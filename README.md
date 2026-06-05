@@ -41,6 +41,24 @@ Requests are routed through a same-origin Vite proxy (`/eleven`) that injects
 the key server-side — this avoids browser CORS errors and keeps the key out of
 the client bundle. The proxy is active under `npm run dev` and `npm run preview`.
 
+### Pre-generate audio (recommended)
+
+For instant, reliable playback (no runtime API calls, no CORS, no latency),
+pre-render every line and mood SFX to `public/audio/` once:
+
+```bash
+npm run audio
+```
+
+This reads your key, writes `public/audio/voice/*.mp3`, `public/audio/sfx/*.mp3`,
+and `public/audio/manifest.json`, then the app plays those local files (falling
+back to the live proxy for anything not pre-generated). Re-running only fetches
+what's new. `public/audio/` is git-ignored.
+
+> On the **free ElevenLabs plan**, only default voices work via the API (library
+> voices return `402`). The defaults shipped here are free-tier voices. Override
+> any of them with `VITE_ELEVENLABS_VOICE_*` if you have a paid plan.
+
 > **Security note:** `VITE_` variables are bundled into the client, so the key
 > is visible to anyone who loads the app. That is acceptable for a local/demo
 > build. For a public deployment, proxy the ElevenLabs requests through a small

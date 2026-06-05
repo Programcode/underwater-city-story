@@ -1,15 +1,8 @@
 import { useCallback, useMemo, useRef } from 'react';
+import { MOOD_SFX_PROMPTS } from '../data/audioPrompts';
+import { loadAudioManifest } from '../lib/audioManifest';
 import { isNarrationConfigured, synthesizeSfxToUrl } from '../lib/elevenlabs';
 import type { SceneMood } from '../types';
-
-const MOOD_PROMPTS: Record<SceneMood, string> = {
-  calm: 'gentle underwater room tone, distant muffled market murmur, soft bubbling water, calm',
-  tense: 'low ominous underwater drone, faint sonar ping, quiet unease, suspense',
-  descent: 'descending into deep machinery, metallic groans, distant engine rumble, dripping water',
-  secret: 'quiet tense room tone, faint electrical hum, paper rustle, held breath, suspense',
-  danger: 'rising alarming low pulse, distant muffled alarm underwater, dread',
-  hope: 'warm hopeful swelling tone, soft shimmer, light breaking through water, relief'
-};
 
 export type Sfx = {
   configured: boolean;
@@ -29,24 +22,34 @@ export function useSfx(): Sfx {
 
   const playMood = useCallback(
     (mood: SceneMood) => {
-      if (!configured) return;
       if (lastMoodRef.current === mood) return;
       lastMoodRef.current = mood;
       const myToken = (tokenRef.current += 1);
-      synthesizeSfxToUrl(MOOD_PROMPTS[mood] ?? MOOD_PROMPTS.calm, 7)
-        .then((url) => {
-          if (myToken !== tokenRef.current) return;
+
+      void (async () => {
+        try {
+          const manifest = await loadAudioManifest();
+          const local = manifest.sfx[mood];
+          let url: string | null = local ? `/audio/${local}` : null;
+          if (!url && configured) {
+            url = await synthesizeSfxToUrl(MOOD_SFX_PROMPTS[mood] ?? MOOD_SFX_PROMPTS.calm, 7).catch(
+              () => null
+            );
+          }
+          if (!url || myToken !== tokenRef.current) return;
           let audio = audioRef.current;
           if (!audio) {
             audio = new Audio();
             audioRef.current = audio;
           }
-          audio.volume = 0.32;
+          audio.volume = 0.3;
           audio.src = url;
           audio.currentTime = 0;
           void audio.play().catch(() => undefined);
-        })
-        .catch(() => undefined);
+        } catch {
+          /* ignore */
+        }
+      })();
     },
     [configured]
   );

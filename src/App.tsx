@@ -70,9 +70,10 @@ export default function App() {
   const beginRun = useCallback(
     (state: StoryState) => {
       ambience.begin();
+      narration.unlock();
       startTransition({ phase: 'playing', storyState: state });
     },
-    [ambience, startTransition]
+    [ambience, narration, startTransition]
   );
 
   const handleBegin = useCallback(() => {

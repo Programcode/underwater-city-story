@@ -1,4 +1,5 @@
 import type { Speaker } from '../types';
+import { DEFAULT_VOICES } from '../data/audioPrompts';
 
 /**
  * Thin ElevenLabs text-to-speech client used to voice the narrator and cast.
@@ -26,15 +27,6 @@ const OUTPUT_FORMAT = env.VITE_ELEVENLABS_OUTPUT ?? 'mp3_44100_128';
 function configured(): boolean {
   return typeof __ELEVEN_VOICES__ !== 'undefined' && __ELEVEN_VOICES__ === true;
 }
-
-/** Default ElevenLabs premade voices, chosen to fit each role. Overridable via env. */
-const DEFAULT_VOICES: Record<Speaker, string> = {
-  narrator: 'JBFqnCBsd6RMkjVDRZzb', // George — warm, deep storyteller
-  mira: 'XrExE9yKIg1WjnnlVkGX', // Matilda — youthful, earnest
-  ocean: 'MF3mGyEYCl7XYWbV9V6O', // Elli — bright, quick
-  torin: 'pNInz6obpgDQGcFmaJgB', // Adam — rough, grounded
-  veyr: 'XB0fDUnXU5powFXDhCwa' // Charlotte — composed, commanding
-};
 
 export const voiceForSpeaker: Record<Speaker, string> = {
   narrator: env.VITE_ELEVENLABS_VOICE_NARRATOR ?? DEFAULT_VOICES.narrator,

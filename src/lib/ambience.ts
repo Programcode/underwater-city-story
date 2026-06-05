@@ -56,6 +56,12 @@ export class AmbienceEngine {
       master.gain.value = 0;
       master.connect(ctx.destination);
 
+      // A separate "breath" gain carries the slow LFO modulation, so the master
+      // gain stays clean and can be brought to a true silence on fade-out.
+      const breath = ctx.createGain();
+      breath.gain.value = 1;
+      breath.connect(master);
+
       // Drone
       const droneGain = ctx.createGain();
       droneGain.gain.value = 0.1;
@@ -63,7 +69,7 @@ export class AmbienceEngine {
       droneFilter.type = 'lowpass';
       droneFilter.frequency.value = 600;
       droneGain.connect(droneFilter);
-      droneFilter.connect(master);
+      droneFilter.connect(breath);
 
       const droneA = ctx.createOscillator();
       droneA.type = 'sine';
@@ -95,15 +101,15 @@ export class AmbienceEngine {
       noiseGain.gain.value = 0.06;
       noise.connect(noiseFilter);
       noiseFilter.connect(noiseGain);
-      noiseGain.connect(master);
+      noiseGain.connect(breath);
 
-      // Slow breathing LFO on the master.
+      // Slow breathing LFO on the breath gain (around 1.0), never the master.
       const lfo = ctx.createOscillator();
       lfo.frequency.value = 0.06;
       const lfoGain = ctx.createGain();
-      lfoGain.gain.value = 0.18;
+      lfoGain.gain.value = 0.16;
       lfo.connect(lfoGain);
-      lfoGain.connect(master.gain);
+      lfoGain.connect(breath.gain);
 
       droneA.start();
       droneB.start();

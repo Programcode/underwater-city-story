@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { clipKey, loadAudioManifest } from '../lib/audioManifest';
 import { isNarrationConfigured, prefetch, synthesizeToUrl } from '../lib/elevenlabs';
 import type { Speaker } from '../types';
 
@@ -12,18 +13,14 @@ export type SpeakHandlers = {
 };
 
 export type Narration = {
-  /** Whether ElevenLabs is configured with an API key. */
   configured: boolean;
-  /** Whether voice playback is currently on. */
   enabled: boolean;
-  /** Toggle voice playback on/off (persisted). */
   toggle: () => void;
-  /** Speak a line (no-op when disabled/unconfigured). */
   speak: (speaker: Speaker, text: string, handlers?: SpeakHandlers) => void;
-  /** Optionally warm up the next line. */
   prefetchNext: (speaker: Speaker, text: string) => void;
-  /** Stop any current playback. */
   stop: () => void;
+  /** Unlock audio playback from within a user gesture (Safari autoplay). */
+  unlock: () => void;
 };
 
 function readStoredEnabled(configured: boolean): boolean {
@@ -33,6 +30,32 @@ function readStoredEnabled(configured: boolean): boolean {
   return stored === 'true';
 }
 
+/** Builds a tiny silent WAV blob URL used to "bless" the audio element. */
+function silentWavUrl(): string {
+  const sampleRate = 8000;
+  const samples = Math.floor(sampleRate * 0.05);
+  const bytes = 44 + samples * 2;
+  const buffer = new ArrayBuffer(bytes);
+  const view = new DataView(buffer);
+  const writeStr = (offset: number, str: string) => {
+    for (let i = 0; i < str.length; i += 1) view.setUint8(offset + i, str.charCodeAt(i));
+  };
+  writeStr(0, 'RIFF');
+  view.setUint32(4, bytes - 8, true);
+  writeStr(8, 'WAVE');
+  writeStr(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeStr(36, 'data');
+  view.setUint32(40, samples * 2, true);
+  return URL.createObjectURL(new Blob([buffer], { type: 'audio/wav' }));
+}
+
 export function useNarration(): Narration {
   const configured = isNarrationConfigured();
   const [enabled, setEnabled] = useState(() => readStoredEnabled(configured));
@@ -40,10 +63,42 @@ export function useNarration(): Narration {
   const enabledRef = useRef(enabled);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const tokenRef = useRef(0);
+  const unlockedRef = useRef(false);
 
   useEffect(() => {
     enabledRef.current = enabled;
   }, [enabled]);
+
+  const ensureAudio = useCallback((): HTMLAudioElement | null => {
+    if (typeof Audio === 'undefined') return null;
+    if (!audioRef.current) audioRef.current = new Audio();
+    return audioRef.current;
+  }, []);
+
+  const unlock = useCallback(() => {
+    if (unlockedRef.current) return;
+    const audio = ensureAudio();
+    if (!audio) return;
+    unlockedRef.current = true;
+    try {
+      audio.muted = true;
+      audio.src = silentWavUrl();
+      const played = audio.play();
+      if (played) {
+        played
+          .then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            audio.muted = false;
+          })
+          .catch(() => {
+            audio.muted = false;
+          });
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [ensureAudio]);
 
   const stop = useCallback(() => {
     tokenRef.current += 1;
@@ -54,55 +109,73 @@ export function useNarration(): Narration {
     }
   }, []);
 
+  const playUrl = useCallback(
+    (url: string, myToken: number, handlers?: SpeakHandlers) => {
+      const audio = ensureAudio();
+      if (!audio) {
+        handlers?.onPlay?.(Number.NaN);
+        return;
+      }
+      audio.onended = () => {
+        if (myToken === tokenRef.current) handlers?.onEnd?.();
+      };
+      audio.muted = false;
+      audio.src = url;
+      audio.currentTime = 0;
+      void audio
+        .play()
+        .then(() => {
+          if (myToken === tokenRef.current) handlers?.onPlay?.((audio.duration || 0) * 1000);
+        })
+        .catch(() => {
+          if (myToken === tokenRef.current) handlers?.onPlay?.(Number.NaN);
+        });
+    },
+    [ensureAudio]
+  );
+
   const speak = useCallback(
     (speaker: Speaker, text: string, handlers?: SpeakHandlers) => {
-      if (!configured || !enabledRef.current || !text) {
+      if (!enabledRef.current || !text) {
         handlers?.onPlay?.(Number.NaN);
         return;
       }
       const myToken = (tokenRef.current += 1);
 
-      synthesizeToUrl(speaker, text)
-        .then((url) => {
-          if (myToken !== tokenRef.current || !enabledRef.current) return;
-          let audio = audioRef.current;
-          if (!audio) {
-            audio = new Audio();
-            audioRef.current = audio;
+      void (async () => {
+        try {
+          const manifest = await loadAudioManifest();
+          const local = manifest.voices[clipKey(speaker, text)];
+          let url: string | null = local ? `/audio/${local}` : null;
+          if (!url && configured) {
+            url = await synthesizeToUrl(speaker, text).catch(() => null);
           }
-          audio.onended = () => {
-            if (myToken === tokenRef.current) handlers?.onEnd?.();
-          };
-          audio.src = url;
-          audio.currentTime = 0;
-          void audio
-            .play()
-            .then(() => {
-              if (myToken === tokenRef.current) {
-                handlers?.onPlay?.((audio?.duration ?? 0) * 1000);
-              }
-            })
-            .catch(() => {
-              if (myToken === tokenRef.current) handlers?.onPlay?.(Number.NaN);
-            });
-        })
-        .catch((error) => {
-          console.warn('Narration unavailable:', error);
+          if (!url || myToken !== tokenRef.current || !enabledRef.current) {
+            handlers?.onPlay?.(Number.NaN);
+            return;
+          }
+          playUrl(url, myToken, handlers);
+        } catch {
           handlers?.onPlay?.(Number.NaN);
-        });
+        }
+      })();
     },
-    [configured]
+    [configured, playUrl]
   );
 
   const prefetchNext = useCallback(
     (speaker: Speaker, text: string) => {
-      if (!configured || !enabledRef.current) return;
-      prefetch(speaker, text);
+      if (!enabledRef.current || !configured) return;
+      // Local clips need no warming; only the live proxy benefits from prefetch.
+      void loadAudioManifest().then((manifest) => {
+        if (!manifest.voices[clipKey(speaker, text)]) prefetch(speaker, text);
+      });
     },
     [configured]
   );
 
   const toggle = useCallback(() => {
+    unlock();
     setEnabled((current) => {
       const next = !current;
       if (typeof window !== 'undefined') {
@@ -118,9 +191,8 @@ export function useNarration(): Narration {
       }
       return next;
     });
-  }, []);
+  }, [unlock]);
 
-  // Clean up the audio element on unmount.
   useEffect(() => {
     return () => {
       const audio = audioRef.current;
@@ -132,7 +204,7 @@ export function useNarration(): Narration {
   }, []);
 
   return useMemo(
-    () => ({ configured, enabled, toggle, speak, prefetchNext, stop }),
-    [configured, enabled, toggle, speak, prefetchNext, stop]
+    () => ({ configured, enabled, toggle, speak, prefetchNext, stop, unlock }),
+    [configured, enabled, toggle, speak, prefetchNext, stop, unlock]
   );
 }
