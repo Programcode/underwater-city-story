@@ -37,6 +37,10 @@ and an optional sound-effect "sting" plays when the scene mood changes.
 Without a key the game runs normally (procedural ambience only) and the Voices
 toggle is inert.
 
+Requests are routed through a same-origin Vite proxy (`/eleven`) that injects
+the key server-side — this avoids browser CORS errors and keeps the key out of
+the client bundle. The proxy is active under `npm run dev` and `npm run preview`.
+
 > **Security note:** `VITE_` variables are bundled into the client, so the key
 > is visible to anyone who loads the app. That is acceptable for a local/demo
 > build. For a public deployment, proxy the ElevenLabs requests through a small

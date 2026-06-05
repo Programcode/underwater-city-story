@@ -14,12 +14,12 @@ type MoodProfile = {
 };
 
 const MOODS: Record<SceneMood, MoodProfile> = {
-  calm: { root: 98, cutoff: 720, noise: 0.05, drone: 0.1, detune: 2 },
-  tense: { root: 110, cutoff: 520, noise: 0.06, drone: 0.11, detune: 14 },
-  descent: { root: 73, cutoff: 360, noise: 0.08, drone: 0.13, detune: 6 },
-  secret: { root: 87, cutoff: 460, noise: 0.06, drone: 0.12, detune: 18 },
-  danger: { root: 65, cutoff: 300, noise: 0.1, drone: 0.14, detune: 22 },
-  hope: { root: 131, cutoff: 900, noise: 0.045, drone: 0.1, detune: 3 }
+  calm: { root: 98, cutoff: 760, noise: 0.12, drone: 0.22, detune: 2 },
+  tense: { root: 110, cutoff: 540, noise: 0.16, drone: 0.24, detune: 14 },
+  descent: { root: 73, cutoff: 380, noise: 0.2, drone: 0.28, detune: 6 },
+  secret: { root: 87, cutoff: 480, noise: 0.15, drone: 0.26, detune: 18 },
+  danger: { root: 65, cutoff: 320, noise: 0.22, drone: 0.3, detune: 22 },
+  hope: { root: 131, cutoff: 940, noise: 0.11, drone: 0.22, detune: 3 }
 };
 
 type AudioCtor = typeof AudioContext;
@@ -39,7 +39,7 @@ export class AmbienceEngine {
   private noiseFilter: BiquadFilterNode | null = null;
   private lfo: OscillatorNode | null = null;
   private started = false;
-  private volume = 0.5;
+  private volume = 0.8;
 
   private supported(): boolean {
     return typeof window !== 'undefined' && Boolean(window.AudioContext || (window as unknown as { webkitAudioContext?: AudioCtor }).webkitAudioContext);
@@ -140,7 +140,7 @@ export class AmbienceEngine {
     void this.ctx.resume().catch(() => undefined);
     const now = this.ctx.currentTime;
     this.master.gain.cancelScheduledValues(now);
-    this.master.gain.setTargetAtTime(0.32 * this.volume, now, 1.4);
+    this.master.gain.setTargetAtTime(0.85 * this.volume, now, 0.9);
   }
 
   fadeOut(): void {

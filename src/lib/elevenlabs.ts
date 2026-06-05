@@ -16,11 +16,16 @@ import type { Speaker } from '../types';
 
 const env = import.meta.env as Record<string, string | undefined>;
 
-const API_BASE = 'https://api.elevenlabs.io/v1/text-to-speech';
-const API_KEY = env.VITE_ELEVENLABS_API_KEY;
-// Turbo is low-latency and English-capable, which suits an interactive,
-// line-by-line reader far better than the slower multilingual model.
+// Requests go through the Vite proxy (/eleven → api.elevenlabs.io) which injects
+// the API key server-side, so there is no CORS issue and no key in the bundle.
+const API_BASE = '/eleven/v1/text-to-speech';
 const MODEL_ID = env.VITE_ELEVENLABS_MODEL ?? 'eleven_turbo_v2_5';
+const OUTPUT_FORMAT = env.VITE_ELEVENLABS_OUTPUT ?? 'mp3_44100_128';
+
+/** True when an ElevenLabs key is configured (flag injected by vite.config). */
+function configured(): boolean {
+  return typeof __ELEVEN_VOICES__ !== 'undefined' && __ELEVEN_VOICES__ === true;
+}
 
 /** Default ElevenLabs premade voices, chosen to fit each role. Overridable via env. */
 const DEFAULT_VOICES: Record<Speaker, string> = {
@@ -40,7 +45,7 @@ export const voiceForSpeaker: Record<Speaker, string> = {
 };
 
 export function isNarrationConfigured(): boolean {
-  return Boolean(API_KEY);
+  return configured();
 }
 
 // Cache synthesized audio so repeated lines (and replays) cost nothing.
@@ -56,7 +61,7 @@ function cacheKey(voiceId: string, text: string): string {
  * by voice + text. Throws when the API is unconfigured or the request fails.
  */
 export async function synthesizeToUrl(speaker: Speaker, text: string): Promise<string> {
-  if (!API_KEY) {
+  if (!configured()) {
     throw new Error('ElevenLabs API key is not configured.');
   }
 
@@ -74,19 +79,21 @@ export async function synthesizeToUrl(speaker: Speaker, text: string): Promise<s
   }
 
   const request = (async () => {
-    const response = await fetch(`${API_BASE}/${voiceId}`, {
-      method: 'POST',
-      headers: {
-        'xi-api-key': API_KEY,
-        'content-type': 'application/json',
-        accept: 'audio/mpeg'
-      },
-      body: JSON.stringify({
-        text,
-        model_id: MODEL_ID,
-        voice_settings: { stability: 0.45, similarity_boost: 0.8, style: 0.35, use_speaker_boost: true }
-      })
-    });
+    const response = await fetch(
+      `${API_BASE}/${voiceId}?output_format=${encodeURIComponent(OUTPUT_FORMAT)}`,
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          accept: 'audio/mpeg'
+        },
+        body: JSON.stringify({
+          text,
+          model_id: MODEL_ID,
+          voice_settings: { stability: 0.45, similarity_boost: 0.8, style: 0.35, use_speaker_boost: true }
+        })
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`ElevenLabs request failed: ${response.status}`);
@@ -108,12 +115,12 @@ export async function synthesizeToUrl(speaker: Speaker, text: string): Promise<s
 
 /** Best-effort prefetch so the next line is ready to play instantly. */
 export function prefetch(speaker: Speaker, text: string): void {
-  if (!API_KEY || !text) return;
+  if (!configured() || !text) return;
   void synthesizeToUrl(speaker, text).catch(() => undefined);
 }
 
 // ── Sound effects (ElevenLabs Sound Generation) ─────────────────────────────
-const SFX_API = 'https://api.elevenlabs.io/v1/sound-generation';
+const SFX_API = '/eleven/v1/sound-generation';
 const sfxCache = new Map<string, string>();
 const sfxInFlight = new Map<string, Promise<string>>();
 
@@ -122,7 +129,7 @@ const sfxInFlight = new Map<string, Promise<string>>();
  * duration). Used for subtle per-mood ambience stingers.
  */
 export async function synthesizeSfxToUrl(prompt: string, durationSeconds = 6): Promise<string> {
-  if (!API_KEY) {
+  if (!configured()) {
     throw new Error('ElevenLabs API key is not configured.');
   }
   const key = `${durationSeconds}::${prompt}`;
@@ -135,7 +142,6 @@ export async function synthesizeSfxToUrl(prompt: string, durationSeconds = 6): P
     const response = await fetch(SFX_API, {
       method: 'POST',
       headers: {
-        'xi-api-key': API_KEY,
         'content-type': 'application/json',
         accept: 'audio/mpeg'
       },
