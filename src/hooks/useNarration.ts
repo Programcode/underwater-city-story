@@ -81,7 +81,11 @@ export function useNarration(): Narration {
     if (!audio) return;
     unlockedRef.current = true;
     try {
-      audio.muted = true;
+      // Play an (inaudible) UNMUTED silent clip inside the gesture. A muted play
+      // does not authorise later unmuted playback in Safari/Chrome, so we keep
+      // it unmuted at full volume — the samples are silence, so nothing is heard.
+      audio.muted = false;
+      audio.volume = 1;
       audio.src = silentWavUrl();
       const played = audio.play();
       if (played) {
@@ -89,11 +93,8 @@ export function useNarration(): Narration {
           .then(() => {
             audio.pause();
             audio.currentTime = 0;
-            audio.muted = false;
           })
-          .catch(() => {
-            audio.muted = false;
-          });
+          .catch(() => undefined);
       }
     } catch {
       /* ignore */
