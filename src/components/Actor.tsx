@@ -8,19 +8,30 @@ type ActorProps = {
   /** Camera zoom, used to counter-scale the actor so its size stays constant. */
   zoom: number;
   speaking: boolean;
+  /** Whether the line is actively being voiced (drives a stronger pulse). */
+  voicing?: boolean;
   /** Whether anyone is speaking; non-speakers dim while another actor talks. */
   someoneSpeaking: boolean;
   reduced: boolean;
 };
 
-export function Actor({ character, x, y, zoom, speaking, someoneSpeaking, reduced }: ActorProps) {
+export function Actor({
+  character,
+  x,
+  y,
+  zoom,
+  speaking,
+  voicing = false,
+  someoneSpeaking,
+  reduced
+}: ActorProps) {
   const dimmed = someoneSpeaking && !speaking;
 
   return (
     <motion.div
       className={`actor actor--${character.spriteClass} ${speaking ? 'actor--speaking' : ''} ${
-        dimmed ? 'actor--dim' : ''
-      }`}
+        voicing ? 'actor--voicing' : ''
+      } ${dimmed ? 'actor--dim' : ''}`}
       style={{
         left: `${x}%`,
         top: `${y}%`,

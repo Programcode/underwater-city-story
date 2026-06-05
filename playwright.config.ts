@@ -5,6 +5,9 @@ export default defineConfig({
   fullyParallel: true,
   timeout: 90_000,
   expect: { timeout: 10_000 },
+  // The map asset is large; too many parallel page loads saturate the dev
+  // server and cause unrelated tests to time out. Cap concurrency.
+  workers: 2,
   reporter: [['list']],
   use: {
     baseURL: 'http://127.0.0.1:5173',

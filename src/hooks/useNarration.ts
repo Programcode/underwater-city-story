@@ -4,6 +4,13 @@ import type { Speaker } from '../types';
 
 const STORAGE_KEY = 'athel-voice-enabled';
 
+export type SpeakHandlers = {
+  /** Fired when audio begins; durationMs is NaN/0 if unknown. */
+  onPlay?: (durationMs: number) => void;
+  /** Fired when audio finishes. */
+  onEnd?: () => void;
+};
+
 export type Narration = {
   /** Whether ElevenLabs is configured with an API key. */
   configured: boolean;
@@ -12,7 +19,7 @@ export type Narration = {
   /** Toggle voice playback on/off (persisted). */
   toggle: () => void;
   /** Speak a line (no-op when disabled/unconfigured). */
-  speak: (speaker: Speaker, text: string) => void;
+  speak: (speaker: Speaker, text: string, handlers?: SpeakHandlers) => void;
   /** Optionally warm up the next line. */
   prefetchNext: (speaker: Speaker, text: string) => void;
   /** Stop any current playback. */
@@ -48,8 +55,11 @@ export function useNarration(): Narration {
   }, []);
 
   const speak = useCallback(
-    (speaker: Speaker, text: string) => {
-      if (!configured || !enabledRef.current || !text) return;
+    (speaker: Speaker, text: string, handlers?: SpeakHandlers) => {
+      if (!configured || !enabledRef.current || !text) {
+        handlers?.onPlay?.(Number.NaN);
+        return;
+      }
       const myToken = (tokenRef.current += 1);
 
       synthesizeToUrl(speaker, text)
@@ -60,12 +70,25 @@ export function useNarration(): Narration {
             audio = new Audio();
             audioRef.current = audio;
           }
+          audio.onended = () => {
+            if (myToken === tokenRef.current) handlers?.onEnd?.();
+          };
           audio.src = url;
           audio.currentTime = 0;
-          void audio.play().catch(() => undefined);
+          void audio
+            .play()
+            .then(() => {
+              if (myToken === tokenRef.current) {
+                handlers?.onPlay?.((audio?.duration ?? 0) * 1000);
+              }
+            })
+            .catch(() => {
+              if (myToken === tokenRef.current) handlers?.onPlay?.(Number.NaN);
+            });
         })
         .catch((error) => {
           console.warn('Narration unavailable:', error);
+          handlers?.onPlay?.(Number.NaN);
         });
     },
     [configured]

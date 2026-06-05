@@ -18,7 +18,9 @@ const env = import.meta.env as Record<string, string | undefined>;
 
 const API_BASE = 'https://api.elevenlabs.io/v1/text-to-speech';
 const API_KEY = env.VITE_ELEVENLABS_API_KEY;
-const MODEL_ID = env.VITE_ELEVENLABS_MODEL ?? 'eleven_multilingual_v2';
+// Turbo is low-latency and English-capable, which suits an interactive,
+// line-by-line reader far better than the slower multilingual model.
+const MODEL_ID = env.VITE_ELEVENLABS_MODEL ?? 'eleven_turbo_v2_5';
 
 /** Default ElevenLabs premade voices, chosen to fit each role. Overridable via env. */
 const DEFAULT_VOICES: Record<Speaker, string> = {
@@ -108,4 +110,50 @@ export async function synthesizeToUrl(speaker: Speaker, text: string): Promise<s
 export function prefetch(speaker: Speaker, text: string): void {
   if (!API_KEY || !text) return;
   void synthesizeToUrl(speaker, text).catch(() => undefined);
+}
+
+// ── Sound effects (ElevenLabs Sound Generation) ─────────────────────────────
+const SFX_API = 'https://api.elevenlabs.io/v1/sound-generation';
+const sfxCache = new Map<string, string>();
+const sfxInFlight = new Map<string, Promise<string>>();
+
+/**
+ * Generates a short sound-effect clip from a text prompt (cached by prompt +
+ * duration). Used for subtle per-mood ambience stingers.
+ */
+export async function synthesizeSfxToUrl(prompt: string, durationSeconds = 6): Promise<string> {
+  if (!API_KEY) {
+    throw new Error('ElevenLabs API key is not configured.');
+  }
+  const key = `${durationSeconds}::${prompt}`;
+  const cached = sfxCache.get(key);
+  if (cached) return cached;
+  const pending = sfxInFlight.get(key);
+  if (pending) return pending;
+
+  const request = (async () => {
+    const response = await fetch(SFX_API, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': API_KEY,
+        'content-type': 'application/json',
+        accept: 'audio/mpeg'
+      },
+      body: JSON.stringify({ text: prompt, duration_seconds: durationSeconds, prompt_influence: 0.4 })
+    });
+    if (!response.ok) {
+      throw new Error(`ElevenLabs sound-generation failed: ${response.status}`);
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    sfxCache.set(key, url);
+    return url;
+  })();
+
+  sfxInFlight.set(key, request);
+  try {
+    return await request;
+  } finally {
+    sfxInFlight.delete(key);
+  }
 }

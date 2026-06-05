@@ -5,9 +5,13 @@ import { BookOpen, RotateCcw } from 'lucide-react';
 import { characters } from '../data/characters';
 import { getEndingDialogue, getEndingMood } from '../data/dialogue';
 import { getHotspot } from '../data/mapHotspots';
+import { choiceCatalog, storySceneLabels } from '../data/storyGraph';
+import type { Ambience } from '../hooks/useAmbience';
 import type { Narration } from '../hooks/useNarration';
+import { achievementsById, evaluateAchievements } from '../lib/achievements';
 import { arrangeActors, type Focus } from '../lib/camera';
-import type { CharacterId, Ending, TraitKey } from '../types';
+import { readProgress } from '../lib/progress';
+import type { CharacterId, Ending, StoryState, TraitKey } from '../types';
 import { Actor } from './Actor';
 import { DialogueOverlay } from './DialogueOverlay';
 import { StageControls } from './StageControls';
@@ -15,11 +19,12 @@ import { TypewriterText, type TypewriterHandle } from './TypewriterText';
 
 type EndingSceneProps = {
   ending: Ending;
-  traits: Record<TraitKey, number>;
+  storyState: StoryState;
   onRestart: () => void;
   onOpenAtlas: () => void;
   onOpenMap: () => void;
   narration: Narration;
+  ambience: Ambience;
   reduced: boolean;
 };
 
@@ -45,13 +50,15 @@ const MAP_HEIGHT = 3072;
 
 export function EndingScene({
   ending,
-  traits,
+  storyState,
   onRestart,
   onOpenAtlas,
   onOpenMap,
   narration,
+  ambience,
   reduced
 }: EndingSceneProps) {
+  const traits = storyState.traits;
   const dialogue = useMemo(() => getEndingDialogue(ending), [ending]);
   const mood = ending.mood ?? getEndingMood(ending.id);
   const zoom = 1.55;
@@ -130,6 +137,23 @@ export function EndingScene({
 
   const someoneSpeaking = currentLine.speaker !== 'narrator';
 
+  // The path of meaningful choices the player made this run.
+  const pathSteps = storyState.selectedChoiceIds
+    .map((id) => choiceCatalog[id])
+    .filter(Boolean)
+    .map((entry) => ({
+      label: entry.label,
+      to: entry.nextSceneId === 'ending' ? ending.title : storySceneLabels[entry.nextSceneId] ?? entry.nextSceneId
+    }));
+
+  // Achievements satisfied by this finished run.
+  const earnedAchievements = evaluateAchievements({
+    state: storyState,
+    endingsSeen: readProgress().endingsSeen
+  })
+    .map((id) => achievementsById[id])
+    .filter(Boolean);
+
   return (
     <section className={`ending-stage ending-stage--${ending.id}`} data-testid="ending-stage" data-mood={mood}>
       <div className="map-camera-frame" data-mood={mood}>
@@ -167,7 +191,7 @@ export function EndingScene({
       <div className="letterbox letterbox--top" aria-hidden="true" />
       <div className="letterbox letterbox--bottom" aria-hidden="true" />
 
-      <StageControls onOpenMap={onOpenMap} onOpenAtlas={onOpenAtlas} narration={narration} />
+      <StageControls onOpenMap={onOpenMap} onOpenAtlas={onOpenAtlas} narration={narration} ambience={ambience} />
 
       {!finaleShown ? (
         <>
@@ -207,6 +231,34 @@ export function EndingScene({
                 </div>
               ))}
             </dl>
+          </section>
+
+          <section className="finale-card__path" aria-label="The path you walked">
+            <h3>The path you walked</h3>
+            <ol className="finale-path">
+              {pathSteps.map((stepItem, index) => (
+                <li key={`${stepItem.label}-${index}`}>
+                  <span className="finale-path__choice">{stepItem.label}</span>
+                  <span className="finale-path__to">{stepItem.to}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          <section className="finale-card__achievements" aria-label="Achievements earned">
+            <h3>Achievements earned</h3>
+            {earnedAchievements.length > 0 ? (
+              <ul className="finale-achievements">
+                {earnedAchievements.map((achievement) => (
+                  <li key={achievement.id}>
+                    <strong>{achievement.title}</strong>
+                    <span>{achievement.description}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="finale-achievements__empty">No achievements this run — try another path.</p>
+            )}
           </section>
 
           <div className="finale-card__actions">

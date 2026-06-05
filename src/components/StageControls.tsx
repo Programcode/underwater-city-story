@@ -1,17 +1,31 @@
-import { BookOpen, Map as MapIcon, Volume2, VolumeX } from 'lucide-react';
+import { BookOpen, Map as MapIcon, Music, Volume2, VolumeX } from 'lucide-react';
+import type { Ambience } from '../hooks/useAmbience';
 import type { Narration } from '../hooks/useNarration';
 
 type StageControlsProps = {
   onOpenMap: () => void;
   onOpenAtlas: () => void;
   narration: Narration;
+  ambience: Ambience;
 };
 
-export function StageControls({ onOpenMap, onOpenAtlas, narration }: StageControlsProps) {
+export function StageControls({ onOpenMap, onOpenAtlas, narration, ambience }: StageControlsProps) {
   const voiceOn = narration.configured && narration.enabled;
 
   return (
     <div className="stage-controls">
+      <button
+        type="button"
+        className={`chrome-button chrome-button--icon ${ambience.enabled ? 'is-on' : ''}`}
+        onClick={ambience.toggle}
+        aria-pressed={ambience.enabled}
+        aria-label={ambience.enabled ? 'Turn ambient sound off' : 'Turn ambient sound on'}
+        title={ambience.enabled ? 'Ambience on' : 'Ambience off'}
+      >
+        <Music size={18} aria-hidden="true" />
+        <span className="chrome-button__text">Ambience</span>
+      </button>
+
       <button
         type="button"
         className={`chrome-button chrome-button--icon ${voiceOn ? 'is-on' : ''}`}

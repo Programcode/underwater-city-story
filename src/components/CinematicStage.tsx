@@ -4,13 +4,14 @@ import { getCharactersForScene } from '../data/characters';
 import { getSceneDialogue, getSceneMood } from '../data/dialogue';
 import { getHotspot } from '../data/mapHotspots';
 import type { Narration } from '../hooks/useNarration';
+import type { Ambience } from '../hooks/useAmbience';
 import type { Focus } from '../lib/camera';
 import type { StoryScene, StoryState } from '../types';
 import { ChoiceLayer } from './ChoiceLayer';
+import { DialogueLineView, type DialogueLineHandle } from './DialogueLineView';
 import { DialogueOverlay } from './DialogueOverlay';
 import { MapCamera } from './MapCamera';
 import { StageControls } from './StageControls';
-import { TypewriterText, type TypewriterHandle } from './TypewriterText';
 
 type CinematicStageProps = {
   scene: StoryScene;
@@ -19,6 +20,7 @@ type CinematicStageProps = {
   onOpenAtlas: () => void;
   onOpenMap: () => void;
   narration: Narration;
+  ambience: Ambience;
   reduced: boolean;
 };
 
@@ -38,6 +40,7 @@ export function CinematicStage({
   onOpenAtlas,
   onOpenMap,
   narration,
+  ambience,
   reduced
 }: CinematicStageProps) {
   const dialogue = useMemo(() => getSceneDialogue(scene), [scene]);
@@ -56,30 +59,34 @@ export function CinematicStage({
   const [lineIndex, setLineIndex] = useState(0);
   const [lineDone, setLineDone] = useState(false);
   const [choicesShown, setChoicesShown] = useState(false);
-  const typeRef = useRef<TypewriterHandle>(null);
+  const [voicing, setVoicing] = useState(false);
+  const lineRef = useRef<DialogueLineHandle>(null);
 
   const currentLine = dialogue[Math.min(lineIndex, dialogue.length - 1)];
   const isLastLine = lineIndex >= dialogue.length - 1;
 
-  // Voice the current line and warm up the next one.
+  // Warm up the next line's audio (the current line is voiced by the line view).
   const speak = narration.speak;
   const prefetchNext = narration.prefetchNext;
+  const voiced = narration.configured && narration.enabled;
   useEffect(() => {
-    const line = dialogue[Math.min(lineIndex, dialogue.length - 1)];
-    speak(line.speaker, line.text);
+    if (!voiced) return;
     const next = dialogue[lineIndex + 1];
     if (next) prefetchNext(next.speaker, next.text);
-  }, [dialogue, lineIndex, speak, prefetchNext]);
+  }, [dialogue, lineIndex, voiced, prefetchNext]);
+
+  const handleLineDone = useCallback(() => setLineDone(true), []);
 
   const advance = useCallback(() => {
     if (choicesShown) return;
     if (!lineDone) {
-      typeRef.current?.skip();
+      lineRef.current?.skip();
       return;
     }
     if (lineIndex < dialogue.length - 1) {
       setLineIndex((index) => index + 1);
       setLineDone(false);
+      setVoicing(false);
       return;
     }
     setChoicesShown(true);
@@ -115,6 +122,7 @@ export function CinematicStage({
         mood={mood}
         characters={characters}
         speaker={currentLine.speaker}
+        voicing={voicing}
         reduced={reduced}
       />
 
@@ -130,16 +138,20 @@ export function CinematicStage({
         <span className="scene-marker__title">{scene.title}</span>
       </header>
 
-      <StageControls onOpenMap={onOpenMap} onOpenAtlas={onOpenAtlas} narration={narration} />
+      <StageControls onOpenMap={onOpenMap} onOpenAtlas={onOpenAtlas} narration={narration} ambience={ambience} />
 
       <div className="stage-foot">
         <DialogueOverlay speaker={currentLine.speaker} showContinue={!choicesShown} onAdvance={advance}>
-          <TypewriterText
+          <DialogueLineView
             key={`${scene.id}-${lineIndex}`}
-            ref={typeRef}
+            ref={lineRef}
+            speaker={currentLine.speaker}
             text={currentLine.text}
+            voiced={voiced}
             instant={reduced}
-            onDone={() => setLineDone(true)}
+            speak={speak}
+            onDone={handleLineDone}
+            onVoicingChange={setVoicing}
           />
         </DialogueOverlay>
         <ChoiceLayer
