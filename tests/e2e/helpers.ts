@@ -7,6 +7,16 @@ function escapeRegExp(value: string): string {
 /** Emulates reduced motion so the cinematic timing collapses for fast, stable runs. */
 export async function prepare(page: Page): Promise<void> {
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  // Keep e2e deterministic and offline even if a real ElevenLabs key is present:
+  // disable voices + ambience before any app code runs.
+  await page.addInitScript(() => {
+    try {
+      window.localStorage.setItem('athel-voice-enabled', 'false');
+      window.localStorage.setItem('athel-ambience-enabled', 'false');
+    } catch {
+      /* ignore */
+    }
+  });
 }
 
 /** Starts the story from the title screen and waits for the cinematic stage. */
