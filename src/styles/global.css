@@ -362,6 +362,216 @@ a:focus-visible,
   font-weight: 800;
 }
 
+.story-game,
+.ending-panel,
+.lore-panel {
+  padding: 1rem;
+  border: 1px solid rgba(47, 33, 23, 0.18);
+  border-radius: var(--radius-md);
+  background: rgba(255, 244, 219, 0.5);
+}
+
+.story-game__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.story-game__meta span {
+  padding: 0.22rem 0.44rem;
+  border: 1px solid rgba(46, 135, 150, 0.24);
+  border-radius: var(--radius-sm);
+  background: rgba(46, 135, 150, 0.1);
+  color: var(--blue-dark);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.story-game h2,
+.ending-panel h2 {
+  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  line-height: 1.08;
+}
+
+.story-game__copy,
+.ending-panel__copy {
+  margin-top: 0.9rem;
+  color: var(--ink);
+  line-height: 1.65;
+}
+
+.story-game__copy p,
+.ending-panel__copy p {
+  margin: 0 0 0.8rem;
+}
+
+.story-game__choices {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 1.05rem;
+}
+
+.choice-button,
+.restart-button {
+  border: 1px solid rgba(47, 33, 23, 0.3);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(180deg, rgba(255, 244, 219, 0.92), rgba(208, 165, 109, 0.22)),
+    var(--paper-light);
+  box-shadow: 0 8px 18px rgba(47, 33, 23, 0.16);
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast),
+    box-shadow var(--motion-fast),
+    border-color var(--motion-fast);
+}
+
+.choice-button {
+  display: grid;
+  gap: 0.26rem;
+  width: 100%;
+  padding: 0.78rem 0.84rem;
+  text-align: left;
+}
+
+.choice-button:hover:not(:disabled),
+.restart-button:hover {
+  border-color: rgba(169, 121, 50, 0.68);
+  box-shadow: 0 12px 24px rgba(47, 33, 23, 0.22);
+  transform: translateY(-1px);
+}
+
+.choice-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.choice-button__label {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.choice-button__description,
+.choice-button__lock {
+  color: var(--ink-muted);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.choice-button__lock {
+  color: var(--danger);
+}
+
+.ending-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.ending-panel::before {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(169, 121, 50, 0.12));
+  content: "";
+  pointer-events: none;
+}
+
+.ending-panel > * {
+  position: relative;
+}
+
+.ending-panel--hopeful {
+  border-color: rgba(61, 125, 103, 0.38);
+}
+
+.ending-panel--dark {
+  border-color: rgba(140, 51, 40, 0.38);
+}
+
+.ending-panel--bittersweet {
+  border-color: rgba(169, 121, 50, 0.52);
+}
+
+.ending-panel__tone {
+  width: fit-content;
+  margin: 0 0 0.7rem;
+  padding: 0.22rem 0.5rem;
+  border: 1px solid rgba(47, 33, 23, 0.18);
+  border-radius: var(--radius-sm);
+  color: var(--brass-dark);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.ending-panel__summary {
+  margin: 0.55rem 0 0;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.ending-panel__why {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(47, 33, 23, 0.16);
+}
+
+.ending-panel__why h3 {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+}
+
+.ending-panel__why p {
+  margin: 0 0 0.8rem;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.ending-panel__why dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0;
+}
+
+.ending-panel__why div {
+  padding: 0.55rem;
+  border: 1px solid rgba(47, 33, 23, 0.16);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 244, 219, 0.44);
+}
+
+.ending-panel__why dt {
+  color: var(--ink-muted);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.ending-panel__why dd {
+  margin: 0.1rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+
+.restart-button {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.78rem 0.9rem;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
 @keyframes hotspot-pulse {
   0%,
   100% {
