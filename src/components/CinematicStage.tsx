@@ -78,6 +78,7 @@ export function CinematicStage({
   const handleLineDone = useCallback(() => setLineDone(true), []);
 
   const advance = useCallback(() => {
+    narration.unlock();
     if (choicesShown) return;
     if (!lineDone) {
       lineRef.current?.skip();
@@ -90,7 +91,7 @@ export function CinematicStage({
       return;
     }
     setChoicesShown(true);
-  }, [choicesShown, lineDone, lineIndex, dialogue]);
+  }, [choicesShown, lineDone, lineIndex, dialogue, narration]);
 
   // Reveal the choices a beat after the final line finishes typing.
   useEffect(() => {
