@@ -10,6 +10,10 @@ type TypewriterTextProps = {
   text: string;
   speed?: number;
   instant?: boolean;
+  /** When false, hold until voice playback begins. */
+  start?: boolean;
+  /** Pace the reveal to a spoken duration (ms). */
+  durationMs?: number;
   /** Called once when the line has finished revealing. */
   onDone?: () => void;
 };
@@ -19,8 +23,8 @@ type TypewriterTextProps = {
  * each line gets a clean instance (no in-render state resets required).
  */
 export const TypewriterText = forwardRef<TypewriterHandle, TypewriterTextProps>(
-  function TypewriterText({ text, speed = 24, instant = false, onDone }, ref) {
-    const { displayed, isTyping, skip } = useTypewriter(text, { speed, instant });
+  function TypewriterText({ text, speed = 24, instant = false, start = true, durationMs, onDone }, ref) {
+    const { displayed, isTyping, skip } = useTypewriter(text, { speed, instant, start, durationMs });
 
     useImperativeHandle(ref, () => ({ skip }), [skip]);
 

@@ -16,18 +16,26 @@ npm run e2e      # end-to-end tests (Playwright)
 npm run lint
 ```
 
-## Voices (ElevenLabs, optional)
+## Voices & sound (ElevenLabs, optional)
 
-The narrator and each character can be voiced with ElevenLabs text-to-speech.
+The narrator and each character can be voiced with ElevenLabs text-to-speech,
+and an optional sound-effect "sting" plays when the scene mood changes.
 
 1. Copy `.env.example` to `.env.local`.
 2. Set `VITE_ELEVENLABS_API_KEY` to your ElevenLabs key.
-3. (Optional) Override `VITE_ELEVENLABS_VOICE_*` with voice ids from your
-   ElevenLabs library.
-4. Restart `npm run dev`. Toggle voices with the **Voices** button in the
-   top-right control cluster (also persists your preference).
+3. (Optional) Override the model with `VITE_ELEVENLABS_MODEL` (default
+   `eleven_turbo_v2_5` — low latency, English; use `eleven_multilingual_v2`
+   for higher quality at the cost of speed) or the per-character voices with
+   `VITE_ELEVENLABS_VOICE_*`.
+4. Restart `npm run dev`. Use the top-right control cluster:
+   - **Ambience** — procedural underwater soundscape that retunes per mood
+     (works with no key); also triggers the ElevenLabs mood stingers when a key
+     is present.
+   - **Voices** — ElevenLabs narration; the on-screen text paces itself to the
+     spoken line and the speaking portrait pulses.
 
-Without a key the game runs normally and the Voices toggle is inert.
+Without a key the game runs normally (procedural ambience only) and the Voices
+toggle is inert.
 
 > **Security note:** `VITE_` variables are bundled into the client, so the key
 > is visible to anyone who loads the app. That is acceptable for a local/demo
@@ -50,4 +58,11 @@ Without a key the game runs normally and the Voices toggle is inert.
 
 - **Map** — the full cross-section world map; click any brass marker to read its
   lore, related scenes, and collectibles. "Return to the story" closes it.
-- **Atlas** — your foldout journal of collected items and charted places.
+- **Atlas** — your foldout journal of collected items and charted places, plus
+  character bios (Cast) and Achievements (persisted across runs).
+
+## Saving & progress
+
+- The current run autosaves; the title screen offers **Continue** to resume it.
+- Reaching an ending records it and unlocks achievements (kept across runs), and
+  the finale shows **the path you walked** and your trait scores.

@@ -23,6 +23,10 @@ export type Character = {
   spriteClass: string;
   /** Accent colour used for the character's nameplate and speech framing. */
   accent: string;
+  /** Short epithet shown under the name in the cast list. */
+  epithet: string;
+  /** A few sentences of character background for the atlas cast page. */
+  bio: string;
 };
 
 export type CollectibleKind = 'item' | 'artifact' | 'info' | 'lore';

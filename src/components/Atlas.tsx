@@ -1,9 +1,12 @@
 import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { Lock, X } from 'lucide-react';
 
+import { characters } from '../data/characters';
 import { getHotspot } from '../data/mapHotspots';
-import type { StoryState } from '../types';
+import { achievements } from '../lib/achievements';
+import { readProgress } from '../lib/progress';
+import type { CharacterId, StoryState } from '../types';
 import { Journal } from './Journal';
 
 type AtlasProps = {
@@ -12,6 +15,8 @@ type AtlasProps = {
   onClose: () => void;
   reduced: boolean;
 };
+
+const castOrder: CharacterId[] = ['mira', 'ocean', 'torin', 'veyr'];
 
 export function Atlas({ open, storyState, onClose, reduced }: AtlasProps) {
   useEffect(() => {
@@ -24,6 +29,7 @@ export function Atlas({ open, storyState, onClose, reduced }: AtlasProps) {
   }, [open, onClose]);
 
   const discoveredPlaces = storyState.discoveredHotspotIds.map((id) => getHotspot(id));
+  const unlocked = new Set(readProgress().achievements);
 
   return (
     <AnimatePresence>
@@ -77,6 +83,54 @@ export function Atlas({ open, storyState, onClose, reduced }: AtlasProps) {
                 ) : (
                   <p className="atlas__empty">No places charted yet.</p>
                 )}
+              </section>
+
+              <section className="atlas__cast" aria-label="Cast">
+                <h3>The cast</h3>
+                <div className="atlas__cast-list">
+                  {castOrder.map((id) => {
+                    const character = characters[id];
+                    return (
+                      <article className="cast-card" key={character.id}>
+                        <span
+                          className={`cast-card__portrait character-portrait character-portrait--${character.spriteClass}`}
+                          style={{ ['--accent' as string]: character.accent }}
+                          aria-hidden="true"
+                        />
+                        <div className="cast-card__text">
+                          <h4>{character.name}</h4>
+                          <p className="cast-card__epithet">{character.epithet}</p>
+                          <p className="cast-card__bio">{character.bio}</p>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+
+              <section className="atlas__achievements" aria-label="Achievements">
+                <h3>
+                  Achievements <span className="atlas__count">{unlocked.size} / {achievements.length}</span>
+                </h3>
+                <div className="atlas__achievement-list">
+                  {achievements.map((achievement) => {
+                    const isUnlocked = unlocked.has(achievement.id);
+                    return (
+                      <article
+                        className={`achievement-card ${isUnlocked ? 'achievement-card--unlocked' : 'achievement-card--locked'}`}
+                        key={achievement.id}
+                      >
+                        <div className="achievement-card__icon" aria-hidden="true">
+                          {isUnlocked ? '★' : <Lock size={14} />}
+                        </div>
+                        <div>
+                          <h4>{achievement.title}</h4>
+                          <p>{achievement.description}</p>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
               </section>
             </div>
           </motion.div>

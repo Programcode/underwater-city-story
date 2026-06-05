@@ -8,7 +8,9 @@ export const characters: Record<CharacterId, Character> = {
     xPercent: 48,
     yPercent: 54,
     spriteClass: 'mira',
-    accent: '#d9b15a'
+    accent: '#d9b15a',
+    epithet: 'The witness',
+    bio: 'A bright Archimedes School student from the lower levels who notices the small wrong details others overlook. When a maintenance errand drops a buried radiation report into her hands, her ordinary life quietly ends — and a dangerous question begins.'
   },
   ocean: {
     id: 'ocean',
@@ -17,7 +19,9 @@ export const characters: Record<CharacterId, Character> = {
     xPercent: 61,
     yPercent: 40,
     spriteClass: 'ocean',
-    accent: '#5fb6c4'
+    accent: '#5fb6c4',
+    epithet: 'The friend',
+    bio: "Mira's closest friend and sharpest sounding board. Ocean reads people and timing better than anyone, and she is the first to say out loud that people do not simply vanish from engine errands. Loyal to a fault, which is exactly what makes her a target."
   },
   torin: {
     id: 'torin',
@@ -26,7 +30,9 @@ export const characters: Record<CharacterId, Character> = {
     xPercent: 39,
     yPercent: 43,
     spriteClass: 'torin',
-    accent: '#c98a4b'
+    accent: '#c98a4b',
+    epithet: 'The diver',
+    bio: 'A market shopkeeper who moonlights as a hull diver, Torin has seen the outside of the Tank — living fish, clear water, light that a poisoned world should not have. Pragmatic and steady, he insists that freeing Athel will take proof, not panic.'
   },
   veyr: {
     id: 'veyr',
@@ -35,7 +41,9 @@ export const characters: Record<CharacterId, Character> = {
     xPercent: 52,
     yPercent: 23,
     spriteClass: 'veyr',
-    accent: '#b1556a'
+    accent: '#b1556a',
+    epithet: 'The president',
+    bio: "Athel's newly installed president, whose portrait appears in every classroom before the announcement boards even change. Veyr does not deny the reports — she defends the lie as the only thing that has kept humanity from destroying itself again."
   }
 };
 

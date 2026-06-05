@@ -12,10 +12,11 @@ type MapCameraProps = {
   mood: SceneMood;
   characters: Character[];
   speaker: Speaker;
+  voicing?: boolean;
   reduced: boolean;
 };
 
-export function MapCamera({ focus, zoom, mood, characters, speaker, reduced }: MapCameraProps) {
+export function MapCamera({ focus, zoom, mood, characters, speaker, voicing = false, reduced }: MapCameraProps) {
   const transform = computeCameraTransform(focus, zoom);
   const actors = arrangeActors(characters, focus);
   const someoneSpeaking = speaker !== 'narrator';
@@ -48,6 +49,7 @@ export function MapCamera({ focus, zoom, mood, characters, speaker, reduced }: M
               y={staged.y}
               zoom={zoom}
               speaking={speaker === staged.character.id}
+              voicing={voicing && speaker === staged.character.id}
               someoneSpeaking={someoneSpeaking}
               reduced={reduced}
             />

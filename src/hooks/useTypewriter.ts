@@ -5,6 +5,10 @@ type TypewriterOptions = {
   speed?: number;
   /** When true, the full text is shown immediately (no animation). */
   instant?: boolean;
+  /** When false, hold at 0 characters until it becomes true. */
+  start?: boolean;
+  /** When set, reveal the whole line over this many ms (paces to voice). */
+  durationMs?: number;
 };
 
 type TypewriterResult = {
@@ -23,12 +27,18 @@ type TypewriterResult = {
  * tied to the text (see `TypewriterText`) so a new line gets a fresh instance.
  */
 export function useTypewriter(text: string, options: TypewriterOptions = {}): TypewriterResult {
-  const { speed = 26, instant = false } = options;
+  const { speed = 26, instant = false, start = true, durationMs } = options;
   const [count, setCount] = useState(instant ? text.length : 0);
   const frame = useRef<number | null>(null);
 
+  // Pace to the spoken duration when provided, otherwise a fixed per-char speed.
+  const effectiveSpeed =
+    durationMs && durationMs > 0 && text.length > 0
+      ? Math.max(8, durationMs / text.length)
+      : speed;
+
   useEffect(() => {
-    if (instant) {
+    if (instant || !start) {
       return;
     }
 
@@ -38,8 +48,8 @@ export function useTypewriter(text: string, options: TypewriterOptions = {}): Ty
         lastTick = timestamp;
       }
       const elapsed = timestamp - lastTick;
-      if (elapsed >= speed) {
-        const advance = Math.max(1, Math.floor(elapsed / speed));
+      if (elapsed >= effectiveSpeed) {
+        const advance = Math.max(1, Math.floor(elapsed / effectiveSpeed));
         lastTick = timestamp;
         setCount((current) => Math.min(text.length, current + advance));
       }
@@ -53,7 +63,7 @@ export function useTypewriter(text: string, options: TypewriterOptions = {}): Ty
         frame.current = null;
       }
     };
-  }, [text, speed, instant]);
+  }, [text, effectiveSpeed, instant, start]);
 
   // Stop the animation loop once the full string is revealed.
   useEffect(() => {

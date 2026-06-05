@@ -1646,6 +1646,292 @@ img {
 }
 
 /* ============================================================
+   Title actions (Continue / Begin)
+   ============================================================ */
+.title-screen__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  margin-top: 0.4rem;
+}
+
+.title-screen__continue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.5rem;
+  border: 1px solid rgba(232, 200, 121, 0.6);
+  border-radius: 999px;
+  background: rgba(20, 14, 8, 0.6);
+  color: var(--brass-bright);
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  transition: transform var(--motion-fast), border-color var(--motion-fast), background var(--motion-fast);
+}
+
+.title-screen__continue:hover {
+  transform: translateY(-2px);
+  border-color: var(--brass-bright);
+  background: rgba(34, 24, 14, 0.7);
+}
+
+/* ============================================================
+   Speaking-voice portrait pulse
+   ============================================================ */
+.actor--voicing .actor__portrait {
+  animation: voice-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes voice-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.4), 0 0 22px 2px var(--accent), 0 20px 34px rgba(0, 0, 0, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.4), 0 0 34px 8px var(--accent), 0 20px 34px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* ============================================================
+   Ending finale: path recap + achievements
+   ============================================================ */
+.finale-card__path,
+.finale-card__achievements {
+  margin-top: 1.2rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(111, 77, 28, 0.3);
+  text-align: left;
+}
+
+.finale-card__path h3,
+.finale-card__achievements h3 {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.finale-path {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+  counter-reset: step;
+}
+
+.finale-path li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid rgba(111, 77, 28, 0.22);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 246, 225, 0.5);
+  counter-increment: step;
+}
+
+.finale-path li::before {
+  content: counter(step);
+  flex: 0 0 auto;
+  width: 1.3rem;
+  height: 1.3rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--brass);
+  color: #2a1c0c;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.finale-path__choice {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.finale-path__to {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+}
+
+.finale-path__to::before {
+  content: '→ ';
+  color: var(--brass-dark);
+}
+
+.finale-achievements {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.finale-achievements li {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid rgba(91, 191, 140, 0.4);
+  border-radius: var(--radius-sm);
+  background: rgba(91, 191, 140, 0.12);
+}
+
+.finale-achievements strong {
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+}
+
+.finale-achievements span {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+
+.finale-achievements__empty {
+  margin: 0;
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+/* ============================================================
+   Atlas: cast + achievements
+   ============================================================ */
+.atlas__cast h3,
+.atlas__achievements h3 {
+  margin: 0 0 0.7rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brass-dark);
+}
+
+.atlas__count {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.atlas__cast-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 0.8rem;
+}
+
+.cast-card {
+  display: flex;
+  gap: 0.8rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(111, 77, 28, 0.24);
+  border-radius: var(--radius-md);
+  background: rgba(255, 246, 225, 0.55);
+}
+
+.cast-card__portrait {
+  width: 4rem;
+  height: 4rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 2px solid var(--accent, var(--brass));
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+}
+
+.cast-card__text h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.cast-card__epithet {
+  margin: 0 0 0.3rem;
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brass-dark);
+}
+
+.cast-card__bio {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.atlas__achievement-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.6rem;
+}
+
+.achievement-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid rgba(111, 77, 28, 0.24);
+  border-radius: var(--radius-md);
+  background: rgba(255, 246, 225, 0.45);
+}
+
+.achievement-card__icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  background: rgba(47, 33, 23, 0.12);
+  color: var(--ink-muted);
+  font-size: 1rem;
+}
+
+.achievement-card h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+}
+
+.achievement-card p {
+  margin: 0.1rem 0 0;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--ink-muted);
+}
+
+.achievement-card--unlocked {
+  border-color: rgba(91, 191, 140, 0.5);
+  background: rgba(91, 191, 140, 0.14);
+}
+
+.achievement-card--unlocked .achievement-card__icon {
+  background: rgba(91, 191, 140, 0.3);
+  color: #2f7a57;
+}
+
+.achievement-card--locked {
+  opacity: 0.7;
+}
+
+/* ============================================================
    Reduced motion
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {

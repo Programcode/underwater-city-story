@@ -570,6 +570,28 @@ export const storySceneLabels = Object.fromEntries(
   storyScenes.map((scene) => [scene.id, scene.title])
 ) as Record<string, string>;
 
+export type ChoiceCatalogEntry = {
+  label: string;
+  description: string;
+  fromSceneId: string;
+  nextSceneId: string;
+};
+
+/** Lookup of every choice by id, used to reconstruct the player's path. */
+export const choiceCatalog: Record<string, ChoiceCatalogEntry> = Object.fromEntries(
+  storyScenes.flatMap((scene) =>
+    scene.choices.map((choice) => [
+      choice.id,
+      {
+        label: choice.label,
+        description: choice.description,
+        fromSceneId: scene.id,
+        nextSceneId: choice.nextSceneId
+      }
+    ])
+  )
+) as Record<string, ChoiceCatalogEntry>;
+
 export function getScene(id: string): StoryScene {
   const scene = storyScenes.find((candidate) => candidate.id === id);
 
