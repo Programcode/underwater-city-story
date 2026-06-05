@@ -1,17 +1,27 @@
+import { useMemo, useState } from 'react';
 import { AppShell } from './components/AppShell';
+import { LorePanel } from './components/LorePanel';
+import { MapExplorer } from './components/MapExplorer';
+import { getHotspot } from './data/mapHotspots';
 
 export default function App() {
+  const [activeHotspotId, setActiveHotspotId] = useState<string | null>(null);
+  const activeHotspot = useMemo(
+    () => (activeHotspotId ? getHotspot(activeHotspotId) : null),
+    [activeHotspotId]
+  );
+
   return (
     <AppShell
       map={
-        <div className="placeholder-panel placeholder-panel--map">
-          <p>Interactive map loading...</p>
-        </div>
+        <MapExplorer
+          activeHotspotId={activeHotspotId}
+          onSelectHotspot={(hotspot) => setActiveHotspotId(hotspot.id)}
+        />
       }
       story={
-        <div className="placeholder-panel">
-          <h2>Story</h2>
-          <p>Mira's choices will appear here.</p>
+        <div className="panel-stack">
+          <LorePanel hotspot={activeHotspot} />
         </div>
       }
       journal={
