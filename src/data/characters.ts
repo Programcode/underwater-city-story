@@ -7,7 +7,8 @@ export const characters: Record<CharacterId, Character> = {
     role: 'The witness',
     xPercent: 48,
     yPercent: 54,
-    spriteClass: 'mira'
+    spriteClass: 'mira',
+    accent: '#d9b15a'
   },
   ocean: {
     id: 'ocean',
@@ -15,7 +16,8 @@ export const characters: Record<CharacterId, Character> = {
     role: 'The friend',
     xPercent: 61,
     yPercent: 40,
-    spriteClass: 'ocean'
+    spriteClass: 'ocean',
+    accent: '#5fb6c4'
   },
   torin: {
     id: 'torin',
@@ -23,7 +25,8 @@ export const characters: Record<CharacterId, Character> = {
     role: 'The diver',
     xPercent: 39,
     yPercent: 43,
-    spriteClass: 'torin'
+    spriteClass: 'torin',
+    accent: '#c98a4b'
   },
   veyr: {
     id: 'veyr',
@@ -31,7 +34,8 @@ export const characters: Record<CharacterId, Character> = {
     role: 'The president',
     xPercent: 52,
     yPercent: 23,
-    spriteClass: 'veyr'
+    spriteClass: 'veyr',
+    accent: '#b1556a'
   }
 };
 
@@ -61,4 +65,8 @@ const sceneCharacterIds: Record<string, CharacterId[]> = {
 
 export function getCharactersForScene(sceneId: string): Character[] {
   return (sceneCharacterIds[sceneId] ?? ['mira']).map((id) => characters[id]);
+}
+
+export function getCharacter(id: CharacterId): Character {
+  return characters[id];
 }

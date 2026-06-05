@@ -1,34 +1,55 @@
 :root {
-  color-scheme: light;
+  color-scheme: dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --ink: #2f2117;
-  --ink-muted: #6e5945;
-  --paper: #ead8b8;
-  --paper-deep: #d0a56d;
-  --paper-light: #f7ead0;
-  --paper-faint: #fff4db;
-  --brass: #a97932;
-  --brass-dark: #76511f;
-  --blue-glass: #2e8796;
-  --blue-dark: #155460;
-  --danger: #8c3328;
-  --hope: #3d7d67;
-  --shadow: rgba(47, 33, 23, 0.28);
-  --shadow-strong: rgba(47, 33, 23, 0.42);
-  --line: rgba(47, 33, 23, 0.22);
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --app-panel-width: minmax(340px, 430px);
-  --font-display: "Cinzel", Georgia, serif;
-  --font-body: "Libre Baskerville", Georgia, serif;
-  --font-ui: Inter, ui-sans-serif, system-ui, sans-serif;
-  --motion-fast: 160ms ease;
-  --motion-medium: 260ms ease;
-}
+  -webkit-font-smoothing: antialiased;
 
-@media (max-width: 900px) {
-  :root {
-    --app-panel-width: 100%;
-  }
+  /* Ink + parchment */
+  --ink: #2b1d12;
+  --ink-soft: #4f3b27;
+  --ink-muted: #6e5945;
+  --paper: #ecd9b4;
+  --paper-deep: #d8b985;
+  --paper-light: #f6ead0;
+  --paper-faint: #fff6e1;
+
+  /* Brass + glass */
+  --brass: #c4933f;
+  --brass-bright: #e8c879;
+  --brass-dark: #6f4d1c;
+  --blue-glass: #2e8796;
+  --blue-deep: #123b46;
+
+  /* Cinematic void */
+  --void: #05060a;
+  --void-2: #0b0d14;
+  --letterbox: #000000;
+
+  /* Story tones */
+  --danger: #b6432f;
+  --hope: #5bbf8c;
+
+  /* Mood accents */
+  --mood-calm: #e8b85a;
+  --mood-tense: #3f93a6;
+  --mood-descent: #b8662f;
+  --mood-secret: #5b5fb0;
+  --mood-danger: #c23a32;
+  --mood-hope: #6cc58a;
+
+  --shadow: rgba(0, 0, 0, 0.45);
+  --shadow-strong: rgba(0, 0, 0, 0.66);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --font-display: "Cinzel", "Cinzel Decorative", Georgia, serif;
+  --font-body: "EB Garamond", "Libre Baskerville", Georgia, serif;
+  --font-ui: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --motion-fast: 160ms ease;
+  --motion-medium: 280ms ease;
+
+  --letterbox-h: clamp(2.2rem, 6vh, 4.4rem);
 }
