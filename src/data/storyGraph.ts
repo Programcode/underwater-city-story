@@ -1,4 +1,5 @@
 import type { Ending, EndingId, StoryScene, StoryState, TraitKey } from '../types';
+import { mapHotspots } from './mapHotspots';
 import {
   bittersweetEndingCopy,
   climaxCopy,
@@ -654,10 +655,16 @@ export function applyChoice(state: StoryState, choiceId: string): StoryState {
 
   const nextScene = getScene(choice.nextSceneId);
   const discoveredHotspotIds = new Set(state.discoveredHotspotIds);
-  const collectedItemIds = addCollectedItems(choiceCollectedItemIds, nextScene.collectibleIds);
+  let collectedItemIds = addCollectedItems(choiceCollectedItemIds, nextScene.collectibleIds);
 
   if (nextScene.locationHotspotId) {
+    const wasDiscovered = discoveredHotspotIds.has(nextScene.locationHotspotId);
     discoveredHotspotIds.add(nextScene.locationHotspotId);
+
+    if (!wasDiscovered) {
+      const hotspot = mapHotspots.find((candidate) => candidate.id === nextScene.locationHotspotId);
+      collectedItemIds = addCollectedItems(collectedItemIds, hotspot?.collectibleIds);
+    }
   }
 
   return {

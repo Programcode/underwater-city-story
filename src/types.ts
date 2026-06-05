@@ -4,13 +4,25 @@ export type TraitKey = 'evidence' | 'trust' | 'risk' | 'collective';
 
 export type CharacterId = 'mira' | 'ocean' | 'torin' | 'veyr';
 
+/** Who is delivering a line of dialogue: the narrator, or one of the characters. */
+export type Speaker = 'narrator' | CharacterId;
+
+/** A single beat of cinematic dialogue. */
+export type DialogueLine = {
+  speaker: Speaker;
+  text: string;
+};
+
 export type Character = {
   id: CharacterId;
   name: string;
   role: string;
+  /** Default resting position on the map, as a percentage of the map. */
   xPercent: number;
   yPercent: number;
   spriteClass: string;
+  /** Accent colour used for the character's nameplate and speech framing. */
+  accent: string;
 };
 
 export type CollectibleKind = 'item' | 'artifact' | 'info' | 'lore';
@@ -33,6 +45,9 @@ export type StoryChoice = {
   requiresDiscoveredHotspot?: string;
 };
 
+/** Visual mood used to tint the cinematic stage for a scene. */
+export type SceneMood = 'calm' | 'tense' | 'descent' | 'secret' | 'danger' | 'hope';
+
 export type StoryScene = {
   id: string;
   title: string;
@@ -41,6 +56,12 @@ export type StoryScene = {
   choices: StoryChoice[];
   collectibleIds?: string[];
   isClimax?: boolean;
+  /** Cinematic line-by-line dialogue. Falls back to paragraphs when absent. */
+  dialogue?: DialogueLine[];
+  /** Mood tint for the stage lighting. */
+  mood?: SceneMood;
+  /** Camera zoom multiplier when framing this scene. */
+  cameraZoom?: number;
 };
 
 export type Ending = {
@@ -49,6 +70,11 @@ export type Ending = {
   tone: string;
   summary: string;
   paragraphs: string[];
+  /** Cinematic line-by-line delivery. Falls back to paragraphs when absent. */
+  dialogue?: DialogueLine[];
+  /** Where on the map the ending is framed. */
+  locationHotspotId?: string;
+  mood?: SceneMood;
 };
 
 export type StoryState = {

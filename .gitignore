@@ -3,3 +3,11 @@ dist/
 test-results/
 playwright-report/
 .DS_Store
+
+# Local env files (may contain API keys); keep the template tracked
+.env
+.env.local
+.env.*.local
+
+# Large working-copy duplicate of public/assets/map.jpg
+/Map.jpg

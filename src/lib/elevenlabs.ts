@@ -1,0 +1,111 @@
+import type { Speaker } from '../types';
+
+/**
+ * Thin ElevenLabs text-to-speech client used to voice the narrator and cast.
+ *
+ * Configuration comes from Vite env vars (see `.env.example`):
+ *   VITE_ELEVENLABS_API_KEY        – required to enable voices
+ *   VITE_ELEVENLABS_MODEL          – optional model id
+ *   VITE_ELEVENLABS_VOICE_<ROLE>   – optional per-speaker voice id override
+ *
+ * SECURITY NOTE: a Vite `VITE_` variable is bundled into the client, so the key
+ * is visible to anyone using the app. That is fine for a local/demo build, but
+ * for anything public you should proxy these requests through a small backend
+ * that holds the key server-side.
+ */
+
+const env = import.meta.env as Record<string, string | undefined>;
+
+const API_BASE = 'https://api.elevenlabs.io/v1/text-to-speech';
+const API_KEY = env.VITE_ELEVENLABS_API_KEY;
+const MODEL_ID = env.VITE_ELEVENLABS_MODEL ?? 'eleven_multilingual_v2';
+
+/** Default ElevenLabs premade voices, chosen to fit each role. Overridable via env. */
+const DEFAULT_VOICES: Record<Speaker, string> = {
+  narrator: 'JBFqnCBsd6RMkjVDRZzb', // George — warm, deep storyteller
+  mira: 'XrExE9yKIg1WjnnlVkGX', // Matilda — youthful, earnest
+  ocean: 'MF3mGyEYCl7XYWbV9V6O', // Elli — bright, quick
+  torin: 'pNInz6obpgDQGcFmaJgB', // Adam — rough, grounded
+  veyr: 'XB0fDUnXU5powFXDhCwa' // Charlotte — composed, commanding
+};
+
+export const voiceForSpeaker: Record<Speaker, string> = {
+  narrator: env.VITE_ELEVENLABS_VOICE_NARRATOR ?? DEFAULT_VOICES.narrator,
+  mira: env.VITE_ELEVENLABS_VOICE_MIRA ?? DEFAULT_VOICES.mira,
+  ocean: env.VITE_ELEVENLABS_VOICE_OCEAN ?? DEFAULT_VOICES.ocean,
+  torin: env.VITE_ELEVENLABS_VOICE_TORIN ?? DEFAULT_VOICES.torin,
+  veyr: env.VITE_ELEVENLABS_VOICE_VEYR ?? DEFAULT_VOICES.veyr
+};
+
+export function isNarrationConfigured(): boolean {
+  return Boolean(API_KEY);
+}
+
+// Cache synthesized audio so repeated lines (and replays) cost nothing.
+const urlCache = new Map<string, string>();
+const inFlight = new Map<string, Promise<string>>();
+
+function cacheKey(voiceId: string, text: string): string {
+  return `${voiceId}::${text}`;
+}
+
+/**
+ * Synthesizes a line and returns an object URL for the audio. Results are cached
+ * by voice + text. Throws when the API is unconfigured or the request fails.
+ */
+export async function synthesizeToUrl(speaker: Speaker, text: string): Promise<string> {
+  if (!API_KEY) {
+    throw new Error('ElevenLabs API key is not configured.');
+  }
+
+  const voiceId = voiceForSpeaker[speaker];
+  const key = cacheKey(voiceId, text);
+
+  const cached = urlCache.get(key);
+  if (cached) {
+    return cached;
+  }
+
+  const pending = inFlight.get(key);
+  if (pending) {
+    return pending;
+  }
+
+  const request = (async () => {
+    const response = await fetch(`${API_BASE}/${voiceId}`, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': API_KEY,
+        'content-type': 'application/json',
+        accept: 'audio/mpeg'
+      },
+      body: JSON.stringify({
+        text,
+        model_id: MODEL_ID,
+        voice_settings: { stability: 0.45, similarity_boost: 0.8, style: 0.35, use_speaker_boost: true }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`ElevenLabs request failed: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    urlCache.set(key, url);
+    return url;
+  })();
+
+  inFlight.set(key, request);
+  try {
+    return await request;
+  } finally {
+    inFlight.delete(key);
+  }
+}
+
+/** Best-effort prefetch so the next line is ready to play instantly. */
+export function prefetch(speaker: Speaker, text: string): void {
+  if (!API_KEY || !text) return;
+  void synthesizeToUrl(speaker, text).catch(() => undefined);
+}
