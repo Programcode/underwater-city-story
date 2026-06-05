@@ -2,12 +2,23 @@ export type EndingId = 'hopeful' | 'dark' | 'bittersweet';
 
 export type TraitKey = 'evidence' | 'trust' | 'risk' | 'collective';
 
+export type CollectibleKind = 'item' | 'artifact' | 'info' | 'lore';
+
+export type Collectible = {
+  id: string;
+  title: string;
+  kind: CollectibleKind;
+  description: string;
+  source: string;
+};
+
 export type StoryChoice = {
   id: string;
   label: string;
   description: string;
   nextSceneId: string;
   effects?: Partial<Record<TraitKey, number>>;
+  collectibleIds?: string[];
   requiresDiscoveredHotspot?: string;
 };
 
@@ -17,6 +28,7 @@ export type StoryScene = {
   locationHotspotId?: string;
   paragraphs: string[];
   choices: StoryChoice[];
+  collectibleIds?: string[];
   isClimax?: boolean;
 };
 
@@ -33,6 +45,7 @@ export type StoryState = {
   traits: Record<TraitKey, number>;
   visitedSceneIds: string[];
   discoveredHotspotIds: string[];
+  collectedItemIds: string[];
   selectedChoiceIds: string[];
   endingId: EndingId | null;
 };
@@ -46,6 +59,7 @@ export type MapHotspot = {
   level: 'top' | 'upper' | 'market' | 'middle' | 'lower' | 'engine' | 'surface';
   storySceneIds: string[];
   lore: string[];
+  collectibleIds?: string[];
   animation:
     | 'sun-glint'
     | 'water-ripple'

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { AppShell } from './components/AppShell';
+import { Journal } from './components/Journal';
 import { LorePanel } from './components/LorePanel';
 import { MapExplorer } from './components/MapExplorer';
 import { StoryGame } from './components/StoryGame';
 import { getHotspot } from './data/mapHotspots';
-import { applyChoice, createInitialStoryState, getScene } from './data/storyGraph';
+import { addCollectedItems, applyChoice, createInitialStoryState, getScene } from './data/storyGraph';
 
 export default function App() {
   const [activeHotspotId, setActiveHotspotId] = useState<string | null>(null);
@@ -15,15 +16,18 @@ export default function App() {
   );
 
   function handleSelectHotspot(hotspotId: string) {
+    const hotspot = getHotspot(hotspotId);
+
     setActiveHotspotId(hotspotId);
     setStoryState((current) => {
-      if (current.discoveredHotspotIds.includes(hotspotId)) {
-        return current;
-      }
+      const discoveredHotspotIds = current.discoveredHotspotIds.includes(hotspotId)
+        ? current.discoveredHotspotIds
+        : [...current.discoveredHotspotIds, hotspotId];
 
       return {
         ...current,
-        discoveredHotspotIds: [...current.discoveredHotspotIds, hotspotId]
+        discoveredHotspotIds,
+        collectedItemIds: addCollectedItems(current.collectedItemIds, hotspot.collectibleIds)
       };
     });
   }
@@ -64,10 +68,7 @@ export default function App() {
         </div>
       }
       journal={
-        <div className="placeholder-panel placeholder-panel--journal">
-          <h2>Journal</h2>
-          <p>Discovered clues and places will collect here.</p>
-        </div>
+        <Journal state={storyState} />
       }
     />
   );

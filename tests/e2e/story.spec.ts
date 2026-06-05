@@ -45,3 +45,25 @@ test('story choices can reach every ending', async ({ page }) => {
   await choose(page, 'Use the hatch alone');
   await expect(page.getByRole('heading', { name: 'Dark Ending' })).toBeVisible();
 });
+
+test('optional choices collect artifacts, info, and lore in the bottom journal', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page.getByRole('region', { name: 'Story journal' })).toContainText('Tuna Sandwich');
+
+  await choose(page, 'Ask Torin for the old administration notice');
+  await expect(page.getByRole('region', { name: 'Story journal' })).toContainText(
+    'Veyr Succession Notice'
+  );
+
+  await choose(page, 'Study the new portrait');
+  await expect(page.getByRole('heading', { name: 'The Painted Eyes' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Story journal' })).toContainText(
+    'Glossy Portrait Detail'
+  );
+
+  await page.getByRole('button', { name: 'Open lore for Engine Room' }).click();
+  await expect(page.getByRole('region', { name: 'Story journal' })).toContainText(
+    'Engine Room Lore'
+  );
+});

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { collectibles } from '../data/collectibles';
 import { mapHotspots } from '../data/mapHotspots';
 import {
   applyChoice,
@@ -41,6 +42,14 @@ describe('story graph', () => {
     }
   });
 
+  it('has expanded side choices before the climax', () => {
+    const totalChoices = storyScenes.reduce((sum, scene) => sum + scene.choices.length, 0);
+    const scenesWithMultipleChoices = storyScenes.filter((scene) => scene.choices.length > 1);
+
+    expect(totalChoices).toBeGreaterThanOrEqual(32);
+    expect(scenesWithMultipleChoices.length).toBeGreaterThanOrEqual(9);
+  });
+
   it('can fetch scenes by id', () => {
     expect(getScene('torins-shop').title).toContain('Torin');
   });
@@ -48,11 +57,16 @@ describe('story graph', () => {
   it('only references existing scene and hotspot ids', () => {
     const sceneIds = new Set(storyScenes.map((scene) => scene.id));
     const hotspotIds = new Set(mapHotspots.map((hotspot) => hotspot.id));
+    const collectibleIds = new Set(collectibles.map((item) => item.id));
 
     for (const scene of storyScenes) {
       if (scene.locationHotspotId) {
         expect(hotspotIds.has(scene.locationHotspotId)).toBe(true);
       }
+
+      scene.collectibleIds?.forEach((collectibleId) =>
+        expect(collectibleIds.has(collectibleId)).toBe(true)
+      );
 
       for (const choice of scene.choices) {
         expect(sceneIds.has(choice.nextSceneId) || choice.nextSceneId === 'ending').toBe(true);
@@ -60,8 +74,41 @@ describe('story graph', () => {
         if (choice.requiresDiscoveredHotspot) {
           expect(hotspotIds.has(choice.requiresDiscoveredHotspot)).toBe(true);
         }
+
+        choice.collectibleIds?.forEach((collectibleId) =>
+          expect(collectibleIds.has(collectibleId)).toBe(true)
+        );
       }
     }
+
+    for (const hotspot of mapHotspots) {
+      hotspot.collectibleIds?.forEach((collectibleId) =>
+        expect(collectibleIds.has(collectibleId)).toBe(true)
+      );
+    }
+  });
+
+  it('collects artifacts and info from optional choices and scenes without duplicates', () => {
+    const state = createInitialStoryState();
+    const afterNotice = applyChoice(state, 'ask-for-notice');
+
+    expect(afterNotice.currentSceneId).toBe('school-morning');
+    expect(afterNotice.collectedItemIds).toContain('tuna-sandwich');
+    expect(afterNotice.collectedItemIds).toContain('veyr-succession-notice');
+
+    const afterPortrait = applyChoice(afterNotice, 'study-veyr-portrait');
+    expect(afterPortrait.currentSceneId).toBe('portrait-observation');
+    expect(afterPortrait.collectedItemIds).toContain('glossy-portrait-detail');
+
+    const afterDuplicate = applyChoice(
+      {
+        ...state,
+        currentSceneId: 'torins-shop',
+        collectedItemIds: ['tuna-sandwich', 'veyr-succession-notice']
+      },
+      'ask-for-notice'
+    );
+    expect(afterDuplicate.collectedItemIds.filter((id) => id === 'veyr-succession-notice')).toHaveLength(1);
   });
 
   it.each([

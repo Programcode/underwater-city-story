@@ -16,6 +16,9 @@ export function ChoiceButton({ choice, disabled, onChoose }: ChoiceButtonProps) 
     >
       <span className="choice-button__label">{choice.label}</span>
       <span className="choice-button__description">{choice.description}</span>
+      {choice.collectibleIds?.length ? (
+        <span className="choice-button__reward">Adds to journal</span>
+      ) : null}
       {disabled ? <span className="choice-button__lock">Discover the linked map clue first</span> : null}
     </button>
   );
