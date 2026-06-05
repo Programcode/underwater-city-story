@@ -59,6 +59,20 @@ export const storyScenes: StoryScene[] = [
         label: 'Ask Torin about Veyr',
         description: 'Let the rumor linger as Mira heads upstairs.',
         nextSceneId: 'school-morning'
+      },
+      {
+        id: 'ask-for-notice',
+        label: 'Ask Torin for the old administration notice',
+        description: 'Pocket a small clue about how quickly Veyr appeared.',
+        nextSceneId: 'school-morning',
+        collectibleIds: ['veyr-succession-notice']
+      },
+      {
+        id: 'wrap-sandwich',
+        label: 'Wrap the sandwich for later',
+        description: 'Keep one ordinary thing close before the day turns strange.',
+        nextSceneId: 'school-morning',
+        collectibleIds: ['tuna-sandwich']
       }
     ]
   },
@@ -76,6 +90,54 @@ export const storyScenes: StoryScene[] = [
         label: 'Go to the engine room',
         description: 'Mrs. Rivers sends Mira because she knows the lower levels.',
         nextSceneId: 'descent-to-engine'
+      },
+      {
+        id: 'study-veyr-portrait',
+        label: 'Study the new portrait',
+        description: 'Notice one detail in Veyr\'s painted eyes before the blackout spreads.',
+        nextSceneId: 'portrait-observation'
+      },
+      {
+        id: 'whisper-with-ocean',
+        label: 'Whisper with Ocean',
+        description: 'Trade one worried observation before Mrs. Rivers points toward Mira.',
+        nextSceneId: 'ocean-whisper'
+      }
+    ]
+  },
+  {
+    id: 'portrait-observation',
+    title: 'The Painted Eyes',
+    locationHotspotId: 'archimedes-school',
+    collectibleIds: ['glossy-portrait-detail'],
+    paragraphs: [
+      'The painted eyes seem too glossy for canvas. A tiny black bead catches the fluorescent light and disappears when Mira shifts sideways.',
+      'Before she can stare too long, Mrs. Rivers calls her name and points toward the lower levels.'
+    ],
+    choices: [
+      {
+        id: 'step-forward-after-portrait',
+        label: 'Step forward for the engine errand',
+        description: 'Leave the portrait behind, but not the feeling of being watched.',
+        nextSceneId: 'descent-to-engine'
+      }
+    ]
+  },
+  {
+    id: 'ocean-whisper',
+    title: "Ocean's Warning",
+    locationHotspotId: 'archimedes-school',
+    collectibleIds: ['ocean-whisper'],
+    paragraphs: [
+      'Ocean leans close and whispers that the portrait was installed before the announcement boards changed.',
+      'The detail should be nothing. In the Tank, details are usually how adults hide important things.'
+    ],
+    choices: [
+      {
+        id: 'answer-mrs-rivers',
+        label: 'Answer Mrs. Rivers',
+        description: 'Take the errand before Ocean can ask why Mira looks scared.',
+        nextSceneId: 'descent-to-engine'
       }
     ]
   },
@@ -92,6 +154,30 @@ export const storyScenes: StoryScene[] = [
         id: 'enter-wrong-room',
         label: 'Enter the marked room',
         description: 'The door looks official enough to be the engine room.',
+        nextSceneId: 'radiation-report'
+      },
+      {
+        id: 'trace-maintenance-arrows',
+        label: 'Trace the maintenance arrows',
+        description: 'Follow the scratched symbols along the rail before choosing a door.',
+        nextSceneId: 'maintenance-corridor',
+        collectibleIds: ['maintenance-arrow-rubbing']
+      }
+    ]
+  },
+  {
+    id: 'maintenance-corridor',
+    title: 'The Marked Corridor',
+    locationHotspotId: 'spiral-staircase',
+    paragraphs: [
+      'The arrows are almost invisible unless Mira looks from below. They point away from the public repair desk and toward a narrower service corridor.',
+      'The air tastes metallic here, and the walls carry the engine vibration like a second pulse.'
+    ],
+    choices: [
+      {
+        id: 'push-through-service-door',
+        label: 'Push through the service door',
+        description: 'Take the route the arrows were hiding.',
         nextSceneId: 'radiation-report'
       }
     ]
@@ -111,6 +197,20 @@ export const storyScenes: StoryScene[] = [
         label: 'Try to forget the report',
         description: 'Return to class with the secret buried in the back of Mira\'s mind.',
         nextSceneId: 'return-to-normal'
+      },
+      {
+        id: 'pocket-loose-page',
+        label: 'Pocket one loose report page',
+        description: 'Take a physical artifact before the officials arrive.',
+        nextSceneId: 'return-to-normal',
+        collectibleIds: ['radiation-page']
+      },
+      {
+        id: 'copy-the-numbers',
+        label: 'Copy the radiation numbers as class formulas',
+        description: 'Hide proof in a place that looks like schoolwork.',
+        nextSceneId: 'return-to-normal',
+        collectibleIds: ['coded-radiation-notes']
       }
     ]
   },
@@ -127,6 +227,29 @@ export const storyScenes: StoryScene[] = [
         id: 'watch-for-patterns',
         label: 'Watch for another blackout',
         description: 'Mira waits for a pattern instead of making a reckless accusation.',
+        nextSceneId: 'sara-disappears'
+      },
+      {
+        id: 'make-grayson-paper-boat',
+        label: 'Fold Grayson a paper boat',
+        description: 'Turn the numbers over in Mira\'s head while pretending to play.',
+        nextSceneId: 'grayson-room'
+      }
+    ]
+  },
+  {
+    id: 'grayson-room',
+    title: "Grayson's Paper Boat",
+    collectibleIds: ['grayson-paper-boat'],
+    paragraphs: [
+      'Grayson does not understand radiation reports, but he understands when Mira is too quiet.',
+      'She folds him a paper boat from scrap homework and wonders why a child in an underwater city has never been allowed to learn what an ocean really is.'
+    ],
+    choices: [
+      {
+        id: 'wait-for-school-pattern',
+        label: 'Wait for school to reveal a pattern',
+        description: 'Return to routine and watch what the adults do next.',
         nextSceneId: 'sara-disappears'
       }
     ]
@@ -152,6 +275,55 @@ export const storyScenes: StoryScene[] = [
         label: 'Think of Torin',
         description: 'The diver may understand what the reports mean.',
         nextSceneId: 'investigation-choice'
+      },
+      {
+        id: 'check-city-hall-board',
+        label: 'Check the City Hall board',
+        description: 'Look for a public notice about Sara before trusting the silence.',
+        nextSceneId: 'city-hall-board'
+      },
+      {
+        id: 'walk-ocean-home',
+        label: 'Walk Ocean home',
+        description: 'Let Ocean say what everyone else is afraid to ask.',
+        nextSceneId: 'ocean-walk'
+      }
+    ]
+  },
+  {
+    id: 'city-hall-board',
+    title: 'The Blank Board',
+    locationHotspotId: 'upper-residences',
+    collectibleIds: ['city-hall-silence'],
+    paragraphs: [
+      'City Hall lists ration changes, curfew reminders, and a lecture about surface safety.',
+      'There is no notice about Sara. The blank space where her name should be feels more deliberate than careless.'
+    ],
+    choices: [
+      {
+        id: 'leave-city-hall',
+        label: 'Leave before an administrator notices',
+        description: 'Carry the silence back into the school corridors.',
+        nextSceneId: 'investigation-choice'
+      }
+    ]
+  },
+  {
+    id: 'ocean-walk',
+    title: 'Ocean Asks the Real Question',
+    locationHotspotId: 'market-levels',
+    collectibleIds: ['ocean-whisper'],
+    paragraphs: [
+      'Ocean keeps her voice low until the market noise covers it.',
+      '“People do not vanish from engine errands,” she says. Mira says nothing, and Ocean hears the answer anyway.'
+    ],
+    choices: [
+      {
+        id: 'promise-ocean-careful',
+        label: 'Promise Ocean to be careful',
+        description: 'Keep Ocean close without telling her everything yet.',
+        nextSceneId: 'investigation-choice',
+        effects: { trust: 1 }
       }
     ]
   },
@@ -168,6 +340,30 @@ export const storyScenes: StoryScene[] = [
         id: 'listen-at-door',
         label: 'Listen at the door',
         description: 'Risk one more step toward the truth.',
+        nextSceneId: 'climax-door'
+      },
+      {
+        id: 'mark-stair-turns',
+        label: 'Mark the stair turns with chalk',
+        description: 'Make sure Mira can find this place again if she has to run.',
+        nextSceneId: 'chalk-stair-marks',
+        collectibleIds: ['chalk-stair-mark']
+      }
+    ]
+  },
+  {
+    id: 'chalk-stair-marks',
+    title: 'Three Chalk Marks',
+    locationHotspotId: 'spiral-staircase',
+    paragraphs: [
+      'Mira draws three pale marks under the railing where only someone climbing from below would see them.',
+      'The tiny act makes the forbidden corridor feel less like a trap and more like a route.'
+    ],
+    choices: [
+      {
+        id: 'follow-chalk-to-door',
+        label: 'Follow the marks to the door',
+        description: 'Use the route and listen.',
         nextSceneId: 'climax-door'
       }
     ]
@@ -239,6 +435,7 @@ export const storyScenes: StoryScene[] = [
     id: 'sara-warning',
     title: "Sara's Warning",
     locationHotspotId: 'archimedes-school',
+    collectibleIds: ['sara-warning-note'],
     paragraphs: [
       'Sara returns to class pale, silent, and watched by administrators.',
       'She slides a note under the desk: They know you heard them.',
@@ -291,6 +488,7 @@ export const storyScenes: StoryScene[] = [
     id: 'broadcast-plan',
     title: 'The Abandoned Communications Room',
     locationHotspotId: 'communications-room',
+    collectibleIds: ['communications-manual'],
     paragraphs: [
       'Torin picks the lock while Mira gathers the reports, a recording, and surface footage.',
       'The old broadcast system crackles awake. For the first time, Veyr cannot control who hears the truth.'
@@ -301,14 +499,16 @@ export const storyScenes: StoryScene[] = [
         label: 'Broadcast every piece of proof',
         description: 'Show reports, Veyr\'s admission, and Torin\'s surface footage together.',
         nextSceneId: 'ending',
-        effects: { evidence: 1, trust: 1, collective: 1 }
+        effects: { evidence: 1, trust: 1, collective: 1 },
+        collectibleIds: ['surface-footage']
       },
       {
         id: 'broadcast-before-ready',
         label: 'Broadcast before officials arrive',
         description: 'Get the truth out fast, even if people do not know what to do next.',
         nextSceneId: 'ending',
-        effects: { evidence: 1, collective: 2, risk: 2 }
+        effects: { evidence: 1, collective: 2, risk: 2 },
+        collectibleIds: ['surface-footage']
       }
     ]
   },
@@ -316,6 +516,7 @@ export const storyScenes: StoryScene[] = [
     id: 'blackout-escape',
     title: 'The Blackout Route',
     locationHotspotId: 'surface-dome',
+    collectibleIds: ['stolen-keycard'],
     paragraphs: [
       'During the next blackout, monitoring logs go dark.',
       'Mira reaches the hull inspection point with a stolen keycard, but guards close in before everyone can pass.'
@@ -396,9 +597,14 @@ export function createInitialStoryState(): StoryState {
     traits: { ...initialTraits },
     visitedSceneIds: ['torins-shop'],
     discoveredHotspotIds: ['market-levels'],
+    collectedItemIds: ['tuna-sandwich'],
     selectedChoiceIds: [],
     endingId: null
   };
+}
+
+export function addCollectedItems(currentIds: string[], newIds: string[] = []): string[] {
+  return [...new Set([...currentIds, ...newIds])];
 }
 
 export function applyTraitEffects(
@@ -434,11 +640,13 @@ export function applyChoice(state: StoryState, choiceId: string): StoryState {
 
   const traits = applyTraitEffects(state.traits, choice.effects);
   const selectedChoiceIds = [...state.selectedChoiceIds, choice.id];
+  const choiceCollectedItemIds = addCollectedItems(state.collectedItemIds, choice.collectibleIds);
 
   if (choice.nextSceneId === 'ending') {
     return {
       ...state,
       traits,
+      collectedItemIds: choiceCollectedItemIds,
       selectedChoiceIds,
       endingId: resolveEnding(traits)
     };
@@ -446,6 +654,7 @@ export function applyChoice(state: StoryState, choiceId: string): StoryState {
 
   const nextScene = getScene(choice.nextSceneId);
   const discoveredHotspotIds = new Set(state.discoveredHotspotIds);
+  const collectedItemIds = addCollectedItems(choiceCollectedItemIds, nextScene.collectibleIds);
 
   if (nextScene.locationHotspotId) {
     discoveredHotspotIds.add(nextScene.locationHotspotId);
@@ -457,6 +666,7 @@ export function applyChoice(state: StoryState, choiceId: string): StoryState {
     traits,
     visitedSceneIds: [...state.visitedSceneIds, nextScene.id],
     discoveredHotspotIds: [...discoveredHotspotIds],
+    collectedItemIds,
     selectedChoiceIds
   };
 }

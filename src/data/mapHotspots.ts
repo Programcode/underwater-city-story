@@ -13,6 +13,7 @@ export const mapHotspots: MapHotspot[] = [
       'The top of Athel receives the most sunlight, which makes it feel almost unreal to lower-level residents.',
       'The government teaches that the air above is toxic, but the clear water and living sea creatures hint at a different truth.'
     ],
+    collectibleIds: ['glass-dome-lore'],
     animation: 'sun-glint'
   },
   {
@@ -111,6 +112,7 @@ export const mapHotspots: MapHotspot[] = [
       'Mira discovers reports showing radiation readings at zero.',
       'The engine room becomes the place where ordinary maintenance turns into rebellion.'
     ],
+    collectibleIds: ['engine-room-lore'],
     animation: 'steam-pulse'
   },
   {
@@ -125,6 +127,7 @@ export const mapHotspots: MapHotspot[] = [
       'Torin believes the abandoned communications room can send proof through the Tank.',
       'In the hopeful path, this room turns evidence into public knowledge.'
     ],
+    collectibleIds: ['communications-manual'],
     animation: 'broadcast'
   }
 ];
