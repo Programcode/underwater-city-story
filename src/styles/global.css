@@ -1,0 +1,25 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #ead8b8;
+  color: #2f2117;
+  font-family: Georgia, serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.app-placeholder {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+}
