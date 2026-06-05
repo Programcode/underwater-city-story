@@ -67,3 +67,17 @@ test('optional choices collect artifacts, info, and lore in the bottom journal',
     'Engine Room Lore'
   );
 });
+
+test('story renders as an immersive map movie surface', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page.getByTestId('cinematic-map-stage')).toBeVisible();
+  await expect(page.getByLabel('Narrator dialogue')).toContainText("Torin's Shop");
+  await expect(page.getByLabel('Character cameos')).toContainText('Mira');
+  await expect(page.getByLabel('Character cameos')).toContainText('Torin');
+  await expect(page.getByRole('region', { name: 'Map atlas journal' })).toBeVisible();
+
+  await choose(page, 'Ask Torin for the old administration notice');
+  await expect(page.getByLabel('Narrator dialogue')).toContainText('The New Portrait');
+  await expect(page.getByText('Narrator')).toBeVisible();
+});

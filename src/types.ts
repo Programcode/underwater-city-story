@@ -2,6 +2,17 @@ export type EndingId = 'hopeful' | 'dark' | 'bittersweet';
 
 export type TraitKey = 'evidence' | 'trust' | 'risk' | 'collective';
 
+export type CharacterId = 'mira' | 'ocean' | 'torin' | 'veyr';
+
+export type Character = {
+  id: CharacterId;
+  name: string;
+  role: string;
+  xPercent: number;
+  yPercent: number;
+  spriteClass: string;
+};
+
 export type CollectibleKind = 'item' | 'artifact' | 'info' | 'lore';
 
 export type Collectible = {

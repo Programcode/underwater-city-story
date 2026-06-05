@@ -58,6 +58,7 @@ export default function App() {
       map={
         <MapExplorer
           activeHotspotId={activeHotspotId}
+          activeSceneId={storyState.currentSceneId}
           onSelectHotspot={(hotspot) => handleSelectHotspot(hotspot.id)}
         />
       }
