@@ -11,3 +11,6 @@ playwright-report/
 
 # Large working-copy duplicate of public/assets/map.jpg
 /Map.jpg
+
+# Generated audio (run `npm run audio` to (re)create locally)
+/public/audio/
