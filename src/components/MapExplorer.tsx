@@ -1,16 +1,19 @@
 import { mapHotspots } from '../data/mapHotspots';
+import { getCharactersForScene } from '../data/characters';
 import type { MapHotspot } from '../types';
 
 type MapExplorerProps = {
   activeHotspotId: string | null;
+  activeSceneId: string;
   onSelectHotspot: (hotspot: MapHotspot) => void;
 };
 
 const mapWidth = 5632;
 const mapHeight = 3072;
 
-export function MapExplorer({ activeHotspotId, onSelectHotspot }: MapExplorerProps) {
+export function MapExplorer({ activeHotspotId, activeSceneId, onSelectHotspot }: MapExplorerProps) {
   const activeHotspot = mapHotspots.find((hotspot) => hotspot.id === activeHotspotId) ?? null;
+  const sceneCharacters = getCharactersForScene(activeSceneId);
   const transform = activeHotspot ? 'scale(1.045)' : 'scale(1)';
   const transformOrigin = activeHotspot
     ? `${activeHotspot.xPercent}% ${activeHotspot.yPercent}%`
@@ -51,9 +54,28 @@ export function MapExplorer({ activeHotspotId, onSelectHotspot }: MapExplorerPro
               </button>
             );
           })}
+
+          {sceneCharacters.map((character) => (
+            <div
+              key={character.id}
+              className="map-character"
+              style={{
+                left: `${character.xPercent}%`,
+                top: `${character.yPercent}%`
+              }}
+              aria-label={`${character.name}, ${character.role}`}
+            >
+              <span
+                className={`character-portrait character-portrait--${character.spriteClass}`}
+                aria-hidden="true"
+              />
+              <span className="map-character__label">{character.name}</span>
+            </div>
+          ))}
         </div>
 
         <div className="map-overlay" aria-hidden="true" />
+        <p className="map-prompt">Choose a brass pin to move the map.</p>
       </div>
     </div>
   );

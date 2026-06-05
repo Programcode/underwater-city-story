@@ -8,7 +8,7 @@ type AppShellProps = {
 
 export function AppShell({ map, story, journal }: AppShellProps) {
   return (
-    <main className="app-shell">
+    <main className="app-shell" data-testid="cinematic-map-stage">
       <section className="map-region" aria-label="Interactive map of Athel">
         {map}
       </section>
@@ -21,7 +21,7 @@ export function AppShell({ map, story, journal }: AppShellProps) {
         {story}
       </aside>
 
-      <section className="journal-region" aria-label="Story journal">
+      <section className="journal-region" aria-label="Map atlas journal">
         {journal}
       </section>
     </main>

@@ -23,7 +23,7 @@ export function Journal({ state }: JournalProps) {
     .filter(Boolean);
 
   return (
-    <div className="journal-board">
+    <div className="journal-board" role="region" aria-label="Story journal">
       <div className="journal-board__heading">
         <div>
           <p className="journal-board__eyebrow">Collected during the story</p>
