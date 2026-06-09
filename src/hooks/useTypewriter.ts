@@ -28,7 +28,7 @@ type TypewriterResult = {
  */
 export function useTypewriter(text: string, options: TypewriterOptions = {}): TypewriterResult {
   const { speed = 26, instant = false, start = true, durationMs } = options;
-  const [count, setCount] = useState(instant ? text.length : 0);
+  const [count, setCount] = useState(instant ? text.length : start ? Math.min(1, text.length) : 0);
   const frame = useRef<number | null>(null);
 
   // Pace to the spoken duration when provided, otherwise a fixed per-char speed.
@@ -45,7 +45,7 @@ export function useTypewriter(text: string, options: TypewriterOptions = {}): Ty
     let lastTick = 0;
     const step = (timestamp: number) => {
       if (!lastTick) {
-        lastTick = timestamp;
+        lastTick = timestamp - effectiveSpeed;
       }
       const elapsed = timestamp - lastTick;
       if (elapsed >= effectiveSpeed) {

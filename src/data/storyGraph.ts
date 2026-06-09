@@ -46,7 +46,7 @@ export const storyScenes: StoryScene[] = [
     locationHotspotId: 'market-levels',
     paragraphs: [
       introCopy[0],
-      'Torin mentions that the Tank has a new president. Mira barely has time to react before she notices the clock and bolts toward school.'
+      'Torin mentions the Tank has a new president. Mira barely has time to ask before she sees the clock and bolts for school.'
     ],
     choices: [
       {
@@ -58,7 +58,7 @@ export const storyScenes: StoryScene[] = [
       {
         id: 'ask-about-veyr',
         label: 'Ask Torin about Veyr',
-        description: 'Let the rumor linger as Mira heads upstairs.',
+        description: 'Let the rumor follow Mira upstairs.',
         nextSceneId: 'school-morning'
       },
       {
@@ -83,7 +83,7 @@ export const storyScenes: StoryScene[] = [
     locationHotspotId: 'archimedes-school',
     paragraphs: [
       introCopy[1],
-      'Every student stands for the anthem beneath Veyr\'s painted stare. Then the fluorescent lights die, leaving the classroom in a sudden hush.'
+      'Every student stands for the anthem beneath Veyr\'s painted stare. Then the fluorescent lights die, and the classroom goes silent.'
     ],
     choices: [
       {
@@ -101,7 +101,7 @@ export const storyScenes: StoryScene[] = [
       {
         id: 'whisper-with-ocean',
         label: 'Whisper with Ocean',
-        description: 'Trade one worried observation before Mrs. Rivers points toward Mira.',
+        description: 'Trade one worried observation before Mrs. Rivers notices Mira.',
         nextSceneId: 'ocean-whisper'
       }
     ]
@@ -131,7 +131,7 @@ export const storyScenes: StoryScene[] = [
     collectibleIds: ['ocean-whisper'],
     paragraphs: [
       'Ocean leans close and whispers that the portrait was installed before the announcement boards changed.',
-      'The detail should be nothing. In the Tank, details are usually how adults hide important things.'
+      'It should mean nothing. In the Tank, that is when Mira starts paying attention.'
     ],
     choices: [
       {
@@ -148,7 +148,7 @@ export const storyScenes: StoryScene[] = [
     locationHotspotId: 'spiral-staircase',
     paragraphs: [
       introCopy[2],
-      'The stairs coil through warmer air and thinning light. By the bottom, Mira can only see a glowing personnel sign and a reflective handle.'
+      'The stairs coil through warmer air and thinner light. By the bottom, Mira can only see a glowing personnel sign and a reflective handle.'
     ],
     choices: [
       {
@@ -172,7 +172,7 @@ export const storyScenes: StoryScene[] = [
     locationHotspotId: 'spiral-staircase',
     paragraphs: [
       'The arrows are almost invisible unless Mira looks from below. They point away from the public repair desk and toward a narrower service corridor.',
-      'The air tastes metallic here, and the walls carry the engine vibration like a second pulse.'
+      'The air tastes metallic here, and the engine hum moves through the walls and into her chest.'
     ],
     choices: [
       {
@@ -190,7 +190,7 @@ export const storyScenes: StoryScene[] = [
     paragraphs: [
       'The room is empty. On a desk, Mira finds a confidential folder titled Final Radiation Report C-137.',
       'Every reading says the same impossible thing: radiation levels are zero. The surface is habitable.',
-      'Officials arrive before she can understand what she has seen, and Mira slips away to the correct repair station.'
+      'Officials arrive before she can make sense of it. Mira slips away to the correct repair station.'
     ],
     choices: [
       {
@@ -202,7 +202,7 @@ export const storyScenes: StoryScene[] = [
       {
         id: 'pocket-loose-page',
         label: 'Pocket one loose report page',
-        description: 'Take a physical artifact before the officials arrive.',
+        description: 'Take one page before the officials arrive.',
         nextSceneId: 'return-to-normal',
         collectibleIds: ['radiation-page']
       },
@@ -220,14 +220,14 @@ export const storyScenes: StoryScene[] = [
     title: 'A Secret That Will Not Stay Quiet',
     locationHotspotId: 'industrial-core',
     paragraphs: [
-      'Weeks pass, but the report keeps changing the shape of ordinary life.',
-      'The lessons about poisoned air sound rehearsed. The word ocean starts to feel like something hidden in plain sight.'
+      'Weeks pass, but the report keeps changing ordinary life.',
+      'The lessons about poisoned air sound rehearsed. The word ocean starts to feel staged, like something everyone agreed not to question.'
     ],
     choices: [
       {
         id: 'watch-for-patterns',
         label: 'Watch for another blackout',
-        description: 'Mira waits for a pattern instead of making a reckless accusation.',
+        description: 'Mira waits for a pattern before accusing anyone.',
         nextSceneId: 'sara-disappears'
       },
       {
@@ -358,7 +358,7 @@ export const storyScenes: StoryScene[] = [
     locationHotspotId: 'spiral-staircase',
     paragraphs: [
       'Mira draws three pale marks under the railing where only someone climbing from below would see them.',
-      'The tiny act makes the forbidden corridor feel less like a trap and more like a route.'
+      'It is not much, but the corridor feels less like a trap once she has marked a way back.'
     ],
     choices: [
       {
@@ -405,7 +405,7 @@ export const storyScenes: StoryScene[] = [
     locationHotspotId: 'market-levels',
     paragraphs: [
       'Torin hides Mira while officials thunder past the door.',
-      'He admits he has seen signs of life above: fish, plants, clear sky, and wounds that were not caused by maintenance.',
+      'He admits he has seen life above: fish, plants, clear sky, and wounds that were not caused by maintenance.',
       'Mira understands that a rumor will not be enough. The Tank needs proof.'
     ],
     choices: [
@@ -440,7 +440,7 @@ export const storyScenes: StoryScene[] = [
     paragraphs: [
       'Sara returns to class pale, silent, and watched by administrators.',
       'She slides a note under the desk: They know you heard them.',
-      'Mira has proof, but now she also knows Veyr is already hunting for her.'
+      'Mira has proof, but now she also knows Veyr is looking for her.'
     ],
     choices: [
       {
@@ -545,7 +545,7 @@ export const storyScenes: StoryScene[] = [
     locationHotspotId: 'surface-dome',
     paragraphs: [
       'The papers spread faster than explanations can follow.',
-      'Some citizens call the reports liberation. Others call them treason. The Tank begins to split from the inside out.'
+      'Some citizens call the reports liberation. Others call them treason. The Tank starts splitting at the seams.'
     ],
     choices: [
       {
@@ -612,6 +612,10 @@ export function resolveEnding(traits: Record<TraitKey, number>): EndingId {
   }
 
   return 'dark';
+}
+
+export function getProjectedEnding(state: Pick<StoryState, 'endingId' | 'traits'>): EndingId {
+  return state.endingId ?? resolveEnding(state.traits);
 }
 
 export function createInitialStoryState(): StoryState {

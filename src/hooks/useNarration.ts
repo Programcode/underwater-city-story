@@ -14,6 +14,7 @@ export type SpeakHandlers = {
 
 export type Narration = {
   configured: boolean;
+  localAvailable: boolean;
   enabled: boolean;
   toggle: () => void;
   speak: (speaker: Speaker, text: string, handlers?: SpeakHandlers) => void;
@@ -59,6 +60,7 @@ function silentWavUrl(): string {
 export function useNarration(): Narration {
   const configured = isNarrationConfigured();
   const [enabled, setEnabled] = useState(() => readStoredEnabled(configured));
+  const [localAvailable, setLocalAvailable] = useState(false);
 
   const enabledRef = useRef(enabled);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -68,6 +70,21 @@ export function useNarration(): Narration {
   useEffect(() => {
     enabledRef.current = enabled;
   }, [enabled]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadAudioManifest().then((manifest) => {
+      if (cancelled) return;
+      const hasLocalVoices = Object.keys(manifest.voices).length > 0;
+      setLocalAvailable(hasLocalVoices);
+      if (hasLocalVoices && typeof window !== 'undefined' && window.localStorage.getItem(STORAGE_KEY) === null) {
+        setEnabled(true);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const ensureAudio = useCallback((): HTMLAudioElement | null => {
     if (typeof Audio === 'undefined') return null;
@@ -205,7 +222,7 @@ export function useNarration(): Narration {
   }, []);
 
   return useMemo(
-    () => ({ configured, enabled, toggle, speak, prefetchNext, stop, unlock }),
-    [configured, enabled, toggle, speak, prefetchNext, stop, unlock]
+    () => ({ configured, localAvailable, enabled, toggle, speak, prefetchNext, stop, unlock }),
+    [configured, localAvailable, enabled, toggle, speak, prefetchNext, stop, unlock]
   );
 }

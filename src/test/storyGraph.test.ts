@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { collectibles } from '../data/collectibles';
 import { mapHotspots } from '../data/mapHotspots';
+import { getSceneDialogue } from '../data/dialogue';
 import {
   applyChoice,
   createInitialStoryState,
   endings,
+  getProjectedEnding,
   getScene,
   resolveEnding,
   storyScenes
@@ -52,6 +54,24 @@ describe('story graph', () => {
 
   it('can fetch scenes by id', () => {
     expect(getScene('torins-shop').title).toContain('Torin');
+  });
+
+  it('varies converged scene dialogue based on earlier choices', () => {
+    const state = applyChoice(createInitialStoryState(), 'ask-about-veyr');
+    const dialogue = getSceneDialogue(getScene('school-morning'), state);
+
+    expect(dialogue.map((line) => line.text)).toContain(
+      "Torin said nobody knew Veyr's name yesterday. So why does this portrait look finished?"
+    );
+  });
+
+  it('projects the current ending from in-progress traits', () => {
+    const state = {
+      ...createInitialStoryState(),
+      traits: { evidence: 2, trust: 0, risk: 4, collective: 2 }
+    };
+
+    expect(getProjectedEnding(state)).toBe('bittersweet');
   });
 
   it('only references existing scene and hotspot ids', () => {

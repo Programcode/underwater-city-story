@@ -1809,6 +1809,7 @@ img {
 /* ============================================================
    Atlas: cast + achievements
    ============================================================ */
+.atlas__trajectory h3,
 .atlas__cast h3,
 .atlas__achievements h3 {
   margin: 0 0 0.7rem;
@@ -1821,6 +1822,49 @@ img {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--brass-dark);
+}
+
+.atlas__trajectory {
+  display: grid;
+  grid-template-columns: minmax(9rem, 0.65fr) minmax(14rem, 1fr);
+  gap: 0.8rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(111, 77, 28, 0.28);
+  border-radius: var(--radius-md);
+  background: rgba(255, 246, 225, 0.55);
+}
+
+.atlas__trajectory-eyebrow {
+  margin: 0 0 0.2rem;
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.atlas__trajectory-body p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.atlas__trajectory-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem !important;
+  color: var(--ink) !important;
+}
+
+.atlas__trajectory-note {
+  margin-top: 0.35rem !important;
+  font-family: var(--font-ui);
+  font-size: 0.74rem !important;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--brass-dark) !important;
 }
 
 .atlas__count {

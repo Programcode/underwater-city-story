@@ -5,7 +5,7 @@ import tseslint from 'typescript-eslint';
 
 export default [
   {
-    ignores: ['dist', 'node_modules', 'coverage', 'playwright-report']
+    ignores: ['.void', 'dist', 'node_modules', 'coverage', 'playwright-report']
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
