@@ -43,7 +43,7 @@ export function CinematicStage({
   ambience,
   reduced
 }: CinematicStageProps) {
-  const dialogue = useMemo(() => getSceneDialogue(scene), [scene]);
+  const dialogue = useMemo(() => getSceneDialogue(scene, storyState), [scene, storyState]);
   const characters = useMemo(() => getCharactersForScene(scene.id), [scene.id]);
   const mood = scene.mood ?? getSceneMood(scene.id);
   const zoom = scene.cameraZoom ?? 1.95;
@@ -68,7 +68,7 @@ export function CinematicStage({
   // Warm up the next line's audio (the current line is voiced by the line view).
   const speak = narration.speak;
   const prefetchNext = narration.prefetchNext;
-  const voiced = narration.configured && narration.enabled;
+  const voiced = narration.enabled && (narration.configured || narration.localAvailable);
   useEffect(() => {
     if (!voiced) return;
     const next = dialogue[lineIndex + 1];

@@ -48,6 +48,10 @@ export const DialogueLineView = forwardRef<DialogueLineHandle, DialogueLineViewP
           setActive(true);
           setPlaying(true);
           setDurationMs(Number.isFinite(ms) && ms > 0 ? ms : null);
+        },
+        onEnd: () => {
+          if (cancelled) return;
+          setPlaying(false);
         }
       });
       return () => {

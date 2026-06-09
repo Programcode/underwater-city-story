@@ -22,7 +22,7 @@ The narrator and each character can be voiced with ElevenLabs text-to-speech,
 and an optional sound-effect "sting" plays when the scene mood changes.
 
 1. Copy `.env.example` to `.env.local`.
-2. Set `VITE_ELEVENLABS_API_KEY` to your ElevenLabs key.
+2. Set `ELEVENLABS_API_KEY` to your ElevenLabs key.
 3. (Optional) Override the model with `VITE_ELEVENLABS_MODEL` (default
    `eleven_turbo_v2_5` — low latency, English; use `eleven_multilingual_v2`
    for higher quality at the cost of speed) or the per-character voices with

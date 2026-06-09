@@ -12,5 +12,8 @@ playwright-report/
 # Large working-copy duplicate of public/assets/map.jpg
 /Map.jpg
 
-# Generated audio (run `npm run audio` to (re)create locally)
-/public/audio/
+# Generated audio is committed so it doesn't need regenerating.
+# (Run `npm run audio` only to (re)create or update it.)
+.void
+.wrangler
+*.tsbuildinfo

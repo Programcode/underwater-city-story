@@ -13,9 +13,9 @@ import { arrangeActors, type Focus } from '../lib/camera';
 import { readProgress } from '../lib/progress';
 import type { CharacterId, Ending, StoryState, TraitKey } from '../types';
 import { Actor } from './Actor';
+import { DialogueLineView, type DialogueLineHandle } from './DialogueLineView';
 import { DialogueOverlay } from './DialogueOverlay';
 import { StageControls } from './StageControls';
-import { TypewriterText, type TypewriterHandle } from './TypewriterText';
 
 type EndingSceneProps = {
   ending: Ending;
@@ -82,30 +82,31 @@ export function EndingScene({
   const [lineIndex, setLineIndex] = useState(0);
   const [lineDone, setLineDone] = useState(false);
   const [finaleShown, setFinaleShown] = useState(false);
-  const typeRef = useRef<TypewriterHandle>(null);
+  const [voicing, setVoicing] = useState(false);
+  const lineRef = useRef<DialogueLineHandle>(null);
 
   const currentLine = dialogue[Math.min(lineIndex, dialogue.length - 1)];
   const isLastLine = lineIndex >= dialogue.length - 1;
 
   const speak = narration.speak;
   const prefetchNext = narration.prefetchNext;
+  const voiced = narration.enabled && (narration.configured || narration.localAvailable);
   useEffect(() => {
-    if (finaleShown) return;
-    const line = dialogue[Math.min(lineIndex, dialogue.length - 1)];
-    speak(line.speaker, line.text);
+    if (finaleShown || !voiced) return;
     const next = dialogue[lineIndex + 1];
     if (next) prefetchNext(next.speaker, next.text);
-  }, [dialogue, lineIndex, finaleShown, speak, prefetchNext]);
+  }, [dialogue, lineIndex, finaleShown, voiced, prefetchNext]);
 
   const advance = () => {
     if (finaleShown) return;
     if (!lineDone) {
-      typeRef.current?.skip();
+      lineRef.current?.skip();
       return;
     }
     if (lineIndex < dialogue.length - 1) {
       setLineIndex((index) => index + 1);
       setLineDone(false);
+      setVoicing(false);
       return;
     }
     setFinaleShown(true);
@@ -176,6 +177,7 @@ export function EndingScene({
                     y={staged.y}
                     zoom={zoom}
                     speaking={currentLine.speaker === staged.character.id}
+                    voicing={voicing}
                     someoneSpeaking={someoneSpeaking}
                     reduced={reduced}
                   />
@@ -198,12 +200,16 @@ export function EndingScene({
           <button type="button" className="advance-zone" aria-label="Continue" tabIndex={-1} onClick={advance} />
           <div className="stage-foot">
             <DialogueOverlay speaker={currentLine.speaker} showContinue onAdvance={advance}>
-              <TypewriterText
+              <DialogueLineView
                 key={`${ending.id}-${lineIndex}`}
-                ref={typeRef}
+                ref={lineRef}
+                speaker={currentLine.speaker}
                 text={currentLine.text}
+                voiced={voiced}
                 instant={reduced}
+                speak={speak}
                 onDone={() => setLineDone(true)}
+                onVoicingChange={setVoicing}
               />
             </DialogueOverlay>
           </div>

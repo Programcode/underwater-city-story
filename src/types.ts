@@ -10,7 +10,14 @@ export type Speaker = 'narrator' | CharacterId;
 /** A single beat of cinematic dialogue. */
 export type DialogueLine = {
   speaker: Speaker;
+  /** Text shown on screen (never contains audio tags). */
   text: string;
+  /**
+   * Optional spoken version sent to the TTS engine. May include Eleven v3
+   * audio tags like `[whispers]` or `[sighs]`. When absent, `text` is voiced.
+   * Tags here are never displayed — only `text` is rendered.
+   */
+  voice?: string;
 };
 
 export type Character = {

@@ -5,22 +5,17 @@ import { DEFAULT_VOICES } from '../data/audioPrompts';
  * Thin ElevenLabs text-to-speech client used to voice the narrator and cast.
  *
  * Configuration comes from Vite env vars (see `.env.example`):
- *   VITE_ELEVENLABS_API_KEY        – required to enable voices
  *   VITE_ELEVENLABS_MODEL          – optional model id
  *   VITE_ELEVENLABS_VOICE_<ROLE>   – optional per-speaker voice id override
  *
- * SECURITY NOTE: a Vite `VITE_` variable is bundled into the client, so the key
- * is visible to anyone using the app. That is fine for a local/demo build, but
- * for anything public you should proxy these requests through a small backend
- * that holds the key server-side.
+ * The API key stays server-side in `ELEVENLABS_API_KEY`; the client only sees
+ * the `__ELEVEN_VOICES__` capability flag injected by Vite.
  */
 
 const env = import.meta.env as Record<string, string | undefined>;
 
-// Requests go through the Vite proxy (/eleven → api.elevenlabs.io) which injects
-// the API key server-side, so there is no CORS issue and no key in the bundle.
-const API_BASE = '/eleven/v1/text-to-speech';
-const MODEL_ID = env.VITE_ELEVENLABS_MODEL ?? 'eleven_turbo_v2_5';
+const API_BASE = '/api/eleven/v1/text-to-speech';
+const MODEL_ID = env.VITE_ELEVENLABS_MODEL ?? 'eleven_v3';
 const OUTPUT_FORMAT = env.VITE_ELEVENLABS_OUTPUT ?? 'mp3_44100_128';
 
 /** True when an ElevenLabs key is configured (flag injected by vite.config). */
@@ -29,11 +24,11 @@ function configured(): boolean {
 }
 
 export const voiceForSpeaker: Record<Speaker, string> = {
-  narrator: env.VITE_ELEVENLABS_VOICE_NARRATOR ?? DEFAULT_VOICES.narrator,
-  mira: env.VITE_ELEVENLABS_VOICE_MIRA ?? DEFAULT_VOICES.mira,
-  ocean: env.VITE_ELEVENLABS_VOICE_OCEAN ?? DEFAULT_VOICES.ocean,
-  torin: env.VITE_ELEVENLABS_VOICE_TORIN ?? DEFAULT_VOICES.torin,
-  veyr: env.VITE_ELEVENLABS_VOICE_VEYR ?? DEFAULT_VOICES.veyr
+  narrator: env.VITE_ELEVENLABS_VOICE_NARRATOR || DEFAULT_VOICES.narrator,
+  mira: env.VITE_ELEVENLABS_VOICE_MIRA || DEFAULT_VOICES.mira,
+  ocean: env.VITE_ELEVENLABS_VOICE_OCEAN || DEFAULT_VOICES.ocean,
+  torin: env.VITE_ELEVENLABS_VOICE_TORIN || DEFAULT_VOICES.torin,
+  veyr: env.VITE_ELEVENLABS_VOICE_VEYR || DEFAULT_VOICES.veyr
 };
 
 export function isNarrationConfigured(): boolean {
@@ -82,7 +77,10 @@ export async function synthesizeToUrl(speaker: Speaker, text: string): Promise<s
         body: JSON.stringify({
           text,
           model_id: MODEL_ID,
-          voice_settings: { stability: 0.45, similarity_boost: 0.8, style: 0.35, use_speaker_boost: true }
+          // v3 needs a discrete stability (0.5 = Natural: expressive + reliable).
+          voice_settings: MODEL_ID.includes('v3')
+            ? { stability: 0.5, similarity_boost: 0.75, use_speaker_boost: true }
+            : { stability: 0.4, similarity_boost: 0.8, style: 0.45, use_speaker_boost: true }
         })
       }
     );
@@ -112,7 +110,7 @@ export function prefetch(speaker: Speaker, text: string): void {
 }
 
 // ── Sound effects (ElevenLabs Sound Generation) ─────────────────────────────
-const SFX_API = '/eleven/v1/sound-generation';
+const SFX_API = '/api/eleven/v1/sound-generation';
 const sfxCache = new Map<string, string>();
 const sfxInFlight = new Map<string, Promise<string>>();
 

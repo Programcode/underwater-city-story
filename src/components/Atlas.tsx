@@ -3,10 +3,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Lock, X } from 'lucide-react';
 
 import { characters } from '../data/characters';
+import { endings, getProjectedEnding } from '../data/storyGraph';
 import { getHotspot } from '../data/mapHotspots';
 import { achievements } from '../lib/achievements';
 import { readProgress } from '../lib/progress';
-import type { CharacterId, StoryState } from '../types';
+import type { CharacterId, EndingId, StoryState } from '../types';
 import { Journal } from './Journal';
 
 type AtlasProps = {
@@ -17,6 +18,12 @@ type AtlasProps = {
 };
 
 const castOrder: CharacterId[] = ['mira', 'ocean', 'torin', 'veyr'];
+
+const trajectoryCopy: Record<EndingId, string> = {
+  hopeful: 'Mira is building enough proof, trust, and public support to reveal the truth with control.',
+  bittersweet: 'The truth is moving faster than Mira can organise people around it.',
+  dark: 'Mira is still too isolated, underprepared, or exposed to free the Tank safely.'
+};
 
 export function Atlas({ open, storyState, onClose, reduced }: AtlasProps) {
   useEffect(() => {
@@ -30,6 +37,8 @@ export function Atlas({ open, storyState, onClose, reduced }: AtlasProps) {
 
   const discoveredPlaces = storyState.discoveredHotspotIds.map((id) => getHotspot(id));
   const unlocked = new Set(readProgress().achievements);
+  const projectedEndingId = getProjectedEnding(storyState);
+  const projectedEnding = endings[projectedEndingId];
 
   return (
     <AnimatePresence>
@@ -65,6 +74,20 @@ export function Atlas({ open, storyState, onClose, reduced }: AtlasProps) {
 
             <div className="atlas__body">
               <Journal state={storyState} />
+
+              <section className={`atlas__trajectory atlas__trajectory--${projectedEndingId}`} aria-label="Ending trajectory">
+                <div>
+                  <p className="atlas__trajectory-eyebrow">Current trajectory</p>
+                  <h3>Ending trajectory</h3>
+                </div>
+                <div className="atlas__trajectory-body">
+                  <p className="atlas__trajectory-title">{projectedEnding.title}</p>
+                  <p>{trajectoryCopy[projectedEndingId]}</p>
+                  {!storyState.endingId ? (
+                    <p className="atlas__trajectory-note">This can still change with later choices.</p>
+                  ) : null}
+                </div>
+              </section>
 
               <section className="atlas__places" aria-label="Charted places">
                 <h3>Charted places</h3>
