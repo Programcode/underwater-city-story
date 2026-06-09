@@ -26,4 +26,14 @@ describe('mapHotspots', () => {
       hotspot.storySceneIds.forEach((sceneId) => expect(sceneIds.has(sceneId)).toBe(true));
     }
   });
+
+  it('lists every scene on the hotspot it actually uses', () => {
+    const hotspotsById = new Map(mapHotspots.map((hotspot) => [hotspot.id, hotspot]));
+
+    for (const scene of storyScenes) {
+      if (!scene.locationHotspotId) continue;
+      const hotspot = hotspotsById.get(scene.locationHotspotId);
+      expect(hotspot?.storySceneIds, scene.id).toContain(scene.id);
+    }
+  });
 });

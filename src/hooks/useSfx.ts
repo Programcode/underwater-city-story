@@ -9,7 +9,9 @@ export type Sfx = {
   /** Play a short stinger for a mood (no-op on repeats / when unconfigured). */
   playMood: (mood: SceneMood) => void;
   /** Play a named event SFX when an interaction or story beat needs it. */
-  play: (event: SfxEvent) => void;
+  play: (event: SfxEvent, opts?: { loop?: boolean; volume?: number }) => void;
+  /** Stop a named looping event SFX. */
+  stop: (event: SfxEvent) => void;
 };
 
 /**
@@ -21,6 +23,7 @@ export function useSfx(): Sfx {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const musicRef = useRef<HTMLAudioElement | null>(null);
   const eventRefs = useRef<Partial<Record<SfxEvent, HTMLAudioElement>>>({});
+  const eventTokensRef = useRef<Partial<Record<SfxEvent, number>>>({});
   const lastMoodRef = useRef<SceneMood | null>(null);
   const tokenRef = useRef(0);
 
@@ -77,7 +80,9 @@ export function useSfx(): Sfx {
   );
 
   const play = useCallback(
-    (event: SfxEvent) => {
+    (event: SfxEvent, opts: { loop?: boolean; volume?: number } = {}) => {
+      const myToken = (eventTokensRef.current[event] ?? 0) + 1;
+      eventTokensRef.current[event] = myToken;
       void (async () => {
         try {
           const manifest = await loadAudioManifest();
@@ -87,12 +92,15 @@ export function useSfx(): Sfx {
             url = await synthesizeSfxToUrl(EVENT_SFX_PROMPTS[event], 3).catch(() => null);
           }
           if (!url) return;
+          if (myToken !== eventTokensRef.current[event]) return;
           let audio = eventRefs.current[event];
           if (!audio) {
             audio = new Audio();
-            audio.volume = 0.45;
             eventRefs.current[event] = audio;
           }
+          if (opts.loop && !audio.paused && audio.loop && audio.src.endsWith(url)) return;
+          audio.loop = Boolean(opts.loop);
+          audio.volume = opts.volume ?? (opts.loop ? 0.24 : 0.45);
           audio.src = url;
           audio.currentTime = 0;
           void audio.play().catch(() => undefined);
@@ -104,5 +112,14 @@ export function useSfx(): Sfx {
     [configured]
   );
 
-  return useMemo(() => ({ configured, playMood, play }), [configured, playMood, play]);
+  const stop = useCallback((event: SfxEvent) => {
+    eventTokensRef.current[event] = (eventTokensRef.current[event] ?? 0) + 1;
+    const audio = eventRefs.current[event];
+    if (!audio) return;
+    audio.pause();
+    audio.loop = false;
+    audio.currentTime = 0;
+  }, []);
+
+  return useMemo(() => ({ configured, playMood, play, stop }), [configured, playMood, play, stop]);
 }

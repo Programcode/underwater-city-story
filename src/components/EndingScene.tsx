@@ -177,7 +177,7 @@ export function EndingScene({
                     y={staged.y}
                     zoom={zoom}
                     speaking={currentLine.speaker === staged.character.id}
-                    voicing={voicing}
+                    voicing={voicing && currentLine.speaker === staged.character.id}
                     someoneSpeaking={someoneSpeaking}
                     reduced={reduced}
                   />

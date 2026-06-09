@@ -57,3 +57,24 @@ test('the world map opens, shows place lore on click, and returns to the story',
   await expect(worldMap).toBeHidden();
   await expect(page.getByTestId('cinematic-map-stage')).toBeVisible();
 });
+
+test('non-reduced scene changes show living-map travel before the next scene', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.addInitScript(() => {
+    try {
+      window.localStorage.setItem('athel-voice-enabled', 'false');
+      window.localStorage.setItem('athel-ambience-enabled', 'false');
+    } catch {
+      /* ignore */
+    }
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Begin the Descent' }).click();
+  await expect(page.getByTestId('cinematic-map-stage')).toBeVisible();
+
+  await choose(page, 'Grab the sandwich and run');
+
+  await expect(page.getByTestId('living-map-travel')).toBeVisible();
+  await expect(page.locator('.actor--walk').first()).toBeVisible();
+  await expect(page.getByText('The New Portrait', { exact: true })).toBeVisible({ timeout: 5000 });
+});

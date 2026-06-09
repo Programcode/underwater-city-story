@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { getCharactersForScene } from '../data/characters';
+import { getSceneChoreography, type ChoreographyAction } from '../data/choreography';
 import { getSceneDialogue, getSceneMood } from '../data/dialogue';
-import { getHotspot } from '../data/mapHotspots';
 import type { Narration } from '../hooks/useNarration';
 import type { Ambience } from '../hooks/useAmbience';
-import type { Focus } from '../lib/camera';
-import type { StoryScene, StoryState } from '../types';
+import type { Sfx } from '../hooks/useSfx';
+import { getSceneFocus } from '../lib/stageFocus';
+import type { CharacterId, StoryScene, StoryState } from '../types';
 import { ChoiceLayer } from './ChoiceLayer';
 import { DialogueLineView, type DialogueLineHandle } from './DialogueLineView';
 import { DialogueOverlay } from './DialogueOverlay';
@@ -21,6 +22,7 @@ type CinematicStageProps = {
   onOpenMap: () => void;
   narration: Narration;
   ambience: Ambience;
+  sfx: Sfx;
   reduced: boolean;
 };
 
@@ -31,8 +33,6 @@ function actLabel(visitedCount: number): string {
   return 'Act IV · Consequences';
 }
 
-const DEFAULT_FOCUS: Focus = { x: 49, y: 48 };
-
 export function CinematicStage({
   scene,
   storyState,
@@ -41,18 +41,23 @@ export function CinematicStage({
   onOpenMap,
   narration,
   ambience,
+  sfx,
   reduced
 }: CinematicStageProps) {
   const dialogue = useMemo(() => getSceneDialogue(scene, storyState), [scene, storyState]);
   const characters = useMemo(() => getCharactersForScene(scene.id), [scene.id]);
+  const sceneChoreography = useMemo(() => getSceneChoreography(scene.id), [scene.id]);
+  const actorActions = useMemo<Partial<Record<CharacterId, ChoreographyAction>>>(() => {
+    const actions: Partial<Record<CharacterId, ChoreographyAction>> = {};
+    sceneChoreography.beats.forEach((beat) => {
+      actions[beat.characterId] = beat.action ?? 'idle';
+    });
+    return actions;
+  }, [sceneChoreography]);
   const mood = scene.mood ?? getSceneMood(scene.id);
   const zoom = scene.cameraZoom ?? 1.95;
 
-  const focus = useMemo<Focus>(() => {
-    if (!scene.locationHotspotId) return DEFAULT_FOCUS;
-    const hotspot = getHotspot(scene.locationHotspotId);
-    return { x: hotspot.xPercent, y: hotspot.yPercent };
-  }, [scene.locationHotspotId]);
+  const focus = useMemo(() => getSceneFocus(scene), [scene]);
 
   // This component is remounted per scene (keyed by scene id in App), so line
   // state always starts fresh here.
@@ -74,6 +79,20 @@ export function CinematicStage({
     const next = dialogue[lineIndex + 1];
     if (next) prefetchNext(next.speaker, next.text);
   }, [dialogue, lineIndex, voiced, prefetchNext]);
+
+  useEffect(() => {
+    if (!ambience.enabled) return;
+    const cues = [
+      ...(sceneChoreography.sfx ?? []),
+      ...sceneChoreography.beats
+        .filter((beat) => beat.sfx)
+        .map((beat) => ({ event: beat.sfx!, delayMs: beat.delayMs }))
+    ];
+    const timers = cues.map((cue) =>
+      window.setTimeout(() => sfx.play(cue.event), reduced ? 0 : cue.delayMs ?? 0)
+    );
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [ambience.enabled, reduced, sceneChoreography, sfx]);
 
   const handleLineDone = useCallback(() => setLineDone(true), []);
 
@@ -125,6 +144,7 @@ export function CinematicStage({
         speaker={currentLine.speaker}
         voicing={voicing}
         reduced={reduced}
+        actorActions={actorActions}
       />
 
       {!choicesShown ? (

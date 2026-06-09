@@ -8,7 +8,7 @@ export const mapHotspots: MapHotspot[] = [
     xPercent: 50,
     yPercent: 13,
     level: 'surface',
-    storySceneIds: ['broadcast-plan', 'blackout-escape', 'leak-and-collapse'],
+    storySceneIds: ['blackout-escape', 'leak-and-collapse'],
     lore: [
       'The top of Athel receives the most sunlight, which makes it feel almost unreal to lower-level residents.',
       'The government teaches that the air above is toxic, but the clear water and living sea creatures hint at a different truth.'
@@ -23,7 +23,7 @@ export const mapHotspots: MapHotspot[] = [
     xPercent: 52,
     yPercent: 23,
     level: 'top',
-    storySceneIds: ['caught-and-questioned', 'broadcast-plan'],
+    storySceneIds: ['caught-and-questioned'],
     lore: [
       'Only the wealthiest and most important citizens live here.',
       'The final ascent platforms are hidden near this level, where ordinary citizens are not meant to go.'
@@ -37,7 +37,7 @@ export const mapHotspots: MapHotspot[] = [
     xPercent: 34,
     yPercent: 34,
     level: 'upper',
-    storySceneIds: ['school-morning', 'caught-and-questioned'],
+    storySceneIds: ['city-hall-board'],
     lore: [
       'Higher-class citizens and officials live in cleaner, brighter quarters.',
       "The president's portraits appear in classrooms and public rooms, turning loyalty into a daily ritual."
@@ -51,7 +51,13 @@ export const mapHotspots: MapHotspot[] = [
     xPercent: 60,
     yPercent: 40,
     level: 'middle',
-    storySceneIds: ['school-morning', 'sara-disappears'],
+    storySceneIds: [
+      'school-morning',
+      'portrait-observation',
+      'ocean-whisper',
+      'sara-disappears',
+      'sara-warning'
+    ],
     lore: [
       'Mira and Ocean attend Archimedes because their marks let them study above their home level.',
       'The school teaches that the surface is lethal and that exile means death in seconds.'
@@ -65,7 +71,7 @@ export const mapHotspots: MapHotspot[] = [
     xPercent: 39,
     yPercent: 43,
     level: 'market',
-    storySceneIds: ['torins-shop', 'escape-to-torin'],
+    storySceneIds: ['torins-shop', 'ocean-walk', 'escape-to-torin'],
     lore: [
       'Torin runs a shop here when he is not working as a diver.',
       'For Mira, the market is normal life: breakfast, school rush, and the last place things felt simple.'
@@ -79,7 +85,7 @@ export const mapHotspots: MapHotspot[] = [
     xPercent: 50,
     yPercent: 52,
     level: 'middle',
-    storySceneIds: ['descent-to-engine', 'climax-door'],
+    storySceneIds: ['descent-to-engine', 'maintenance-corridor', 'investigation-choice', 'chalk-stair-marks'],
     lore: [
       'Most residents use the central staircase to move between levels.',
       'The lower Mira walks, the darker and more humid the Tank becomes.'
@@ -93,7 +99,7 @@ export const mapHotspots: MapHotspot[] = [
     xPercent: 38,
     yPercent: 63,
     level: 'lower',
-    storySceneIds: ['descent-to-engine', 'return-to-normal'],
+    storySceneIds: ['return-to-normal', 'grayson-room'],
     lore: [
       'Lower-level workers live close to the machines that keep Athel alive.',
       'This area is loud during the day and almost lightless at night.'
@@ -122,7 +128,7 @@ export const mapHotspots: MapHotspot[] = [
     xPercent: 70,
     yPercent: 48,
     level: 'middle',
-    storySceneIds: ['broadcast-plan', 'escape-to-torin'],
+    storySceneIds: ['broadcast-plan'],
     lore: [
       'Torin believes the abandoned communications room can send proof through the Tank.',
       'In the hopeful path, this room turns evidence into public knowledge.'

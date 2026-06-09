@@ -6,6 +6,7 @@ import { CinematicStage } from './components/CinematicStage';
 import { EndingScene } from './components/EndingScene';
 import { MapOverlay } from './components/MapOverlay';
 import { TitleScreen } from './components/TitleScreen';
+import { TravelStage } from './components/TravelStage';
 import { getEndingMood, getSceneMood } from './data/dialogue';
 import { applyChoice, createInitialStoryState, endings, getScene } from './data/storyGraph';
 import { useAmbience } from './hooks/useAmbience';
@@ -15,6 +16,8 @@ import { useSfx } from './hooks/useSfx';
 import { evaluateAchievements } from './lib/achievements';
 import { recordAchievements, recordEnding } from './lib/progress';
 import { clearSave, hasSave, loadSave, writeSave } from './lib/save';
+import { getScenePlaceLevel } from './lib/stageFocus';
+import { createTravelPlan, type TravelPlan } from './lib/travel';
 import type { StoryState } from './types';
 
 type Phase = 'title' | 'playing' | 'ending';
@@ -23,6 +26,11 @@ type TransitionStep = 'idle' | 'out' | 'in';
 type PendingTarget = {
   phase: Phase;
   storyState: StoryState;
+};
+
+type ActiveTravel = {
+  plan: TravelPlan;
+  target: PendingTarget;
 };
 
 export default function App() {
@@ -36,6 +44,7 @@ export default function App() {
   const [mapOpen, setMapOpen] = useState(false);
   const [step, setStep] = useState<TransitionStep>('idle');
   const [pending, setPending] = useState<PendingTarget | null>(null);
+  const [travel, setTravel] = useState<ActiveTravel | null>(null);
   const [canContinue, setCanContinue] = useState(hasSave);
 
   const startTransition = useCallback((target: PendingTarget) => {
@@ -97,10 +106,18 @@ export default function App() {
         recordAchievements(evaluateAchievements({ state: next, endingsSeen: progress.endingsSeen }));
         startTransition({ phase: 'ending', storyState: next });
       } else {
-        startTransition({ phase: 'playing', storyState: next });
+        const target = { phase: 'playing' as const, storyState: next };
+        if (!reduced && phase === 'playing') {
+          setTravel({
+            plan: createTravelPlan(getScene(storyState.currentSceneId), getScene(next.currentSceneId)),
+            target
+          });
+        } else {
+          startTransition(target);
+        }
       }
     },
-    [storyState, startTransition]
+    [phase, reduced, storyState, startTransition]
   );
 
   const handleRestart = useCallback(() => {
@@ -119,15 +136,41 @@ export default function App() {
   useEffect(() => {
     let mood: ReturnType<typeof getSceneMood> = 'calm';
     if (phase === 'playing') {
-      mood = getSceneMood(storyState.currentSceneId);
+      const scene = getScene(storyState.currentSceneId);
+      mood = getSceneMood(scene.id);
+      ambience.setPlace(getScenePlaceLevel(scene));
     } else if (phase === 'ending' && storyState.endingId) {
       mood = getEndingMood(storyState.endingId);
+      ambience.setPlace('surface');
     }
     ambience.setMood(mood);
     if (phase !== 'title' && ambience.enabled) {
       sfx.playMood(mood);
     }
   }, [phase, storyState.currentSceneId, storyState.endingId, ambience, sfx]);
+
+  useEffect(() => {
+    if (!travel) return;
+    const mood = getSceneMood(travel.plan.toScene.id);
+    ambience.setMood(mood);
+    ambience.setPlace(getScenePlaceLevel(travel.plan.toScene));
+    if (ambience.enabled) {
+      sfx.playMood(mood);
+      sfx.play('footstep', { loop: true, volume: 0.22 });
+    }
+
+    const timer = window.setTimeout(() => {
+      sfx.stop('footstep');
+      setPhase(travel.target.phase);
+      setStoryState(travel.target.storyState);
+      setTravel(null);
+    }, travel.plan.durationMs + 80);
+
+    return () => {
+      window.clearTimeout(timer);
+      sfx.stop('footstep');
+    };
+  }, [ambience, sfx, travel]);
 
   const transitioning = step !== 'idle';
 
@@ -152,9 +195,12 @@ export default function App() {
           onOpenMap={openMap}
           narration={narration}
           ambience={ambience}
+          sfx={sfx}
           reduced={reduced}
         />
       ) : null}
+
+      {travel ? <TravelStage plan={travel.plan} reduced={reduced} /> : null}
 
       {phase === 'ending' && storyState.endingId ? (
         <EndingScene
