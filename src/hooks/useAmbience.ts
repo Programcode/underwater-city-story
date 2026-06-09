@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AmbienceEngine } from '../lib/ambience';
-import type { SceneMood } from '../types';
+import type { MapHotspot, SceneMood } from '../types';
 
 const STORAGE_KEY = 'athel-ambience-enabled';
+type PlaceLevel = MapHotspot['level'];
 
 export type Ambience = {
   enabled: boolean;
@@ -11,6 +12,8 @@ export type Ambience = {
   begin: () => void;
   /** Re-tune the soundscape to a scene mood. */
   setMood: (mood: SceneMood) => void;
+  /** Re-tune the extra room-tone layer to the current map level. */
+  setPlace: (place: PlaceLevel) => void;
 };
 
 function readStored(): boolean {
@@ -23,6 +26,7 @@ export function useAmbience(): Ambience {
   const [enabled, setEnabled] = useState(readStored);
   const engineRef = useRef<AmbienceEngine | null>(null);
   const moodRef = useRef<SceneMood>('calm');
+  const placeRef = useRef<PlaceLevel>('middle');
 
   // Lazily create the engine outside of render (on first user-gesture use).
   const getEngine = useCallback((): AmbienceEngine | null => {
@@ -45,6 +49,7 @@ export function useAmbience(): Ambience {
     if (!engine) return;
     engine.resume();
     engine.setMood(moodRef.current);
+    engine.setPlace(placeRef.current);
     if (enabled) engine.fadeIn();
   }, [enabled, getEngine]);
 
@@ -55,6 +60,11 @@ export function useAmbience(): Ambience {
     },
     []
   );
+
+  const setPlace = useCallback((place: PlaceLevel) => {
+    placeRef.current = place;
+    engineRef.current?.setPlace(place);
+  }, []);
 
   const toggle = useCallback(() => {
     setEnabled((current) => {
@@ -67,6 +77,7 @@ export function useAmbience(): Ambience {
         if (next) {
           engine.resume();
           engine.setMood(moodRef.current);
+          engine.setPlace(placeRef.current);
           engine.fadeIn();
         } else {
           engine.fadeOut();
@@ -76,5 +87,8 @@ export function useAmbience(): Ambience {
     });
   }, [getEngine]);
 
-  return useMemo(() => ({ enabled, toggle, begin, setMood }), [enabled, toggle, begin, setMood]);
+  return useMemo(
+    () => ({ enabled, toggle, begin, setMood, setPlace }),
+    [enabled, toggle, begin, setMood, setPlace]
+  );
 }

@@ -214,7 +214,7 @@ img {
 .character-portrait {
   display: inline-block;
   flex: 0 0 auto;
-  background-image: url('/assets/characters.png');
+  background-image: url('/assets/characters-living.png');
   background-repeat: no-repeat;
   background-size: 200% 200%;
 }
@@ -249,6 +249,7 @@ img {
   transform: scale(var(--inv, 1));
   transform-origin: bottom center;
   animation: actor-float 5s ease-in-out infinite;
+  animation-delay: var(--idle-delay, 0s);
 }
 
 .actor__portrait {
@@ -261,7 +262,7 @@ img {
     0 18px 30px rgba(0, 0, 0, 0.55),
     inset 0 0 18px rgba(0, 0, 0, 0.4);
   filter: saturate(1.05);
-  transition: filter var(--motion-medium), box-shadow var(--motion-medium);
+  transition: filter var(--motion-medium), box-shadow var(--motion-medium), transform var(--motion-fast);
 }
 
 .actor__nameplate {
@@ -309,6 +310,70 @@ img {
 
 .actor--dim .actor__portrait {
   filter: saturate(0.6) brightness(0.62);
+}
+
+.actor--walk .actor__inner {
+  animation: actor-walk 0.78s ease-in-out infinite;
+}
+
+.actor--gesture-point .actor__inner {
+  animation:
+    actor-point 1.15s ease-in-out 1,
+    actor-float 5s ease-in-out 1.15s infinite;
+}
+
+.actor--gesture-react .actor__inner,
+.actor--enter .actor__inner {
+  animation:
+    actor-react 1s ease-out 1,
+    actor-float 5s ease-in-out 1s infinite;
+}
+
+.actor--gesture-nod .actor__inner {
+  animation:
+    actor-nod 1.1s ease-in-out 1,
+    actor-float 5s ease-in-out 1.1s infinite;
+}
+
+.travel-route {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.travel-route polyline {
+  fill: none;
+  stroke: rgba(245, 217, 142, 0.78);
+  stroke-width: 0.56;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1.8 1.4;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 0.35rem rgba(255, 210, 118, 0.7));
+  animation: route-dash 1.1s linear infinite;
+}
+
+.travel-stage {
+  position: absolute;
+  z-index: 80;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: auto;
+  background: #000;
+}
+
+.travel-stage__wash {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 42%, rgba(0, 0, 0, 0.36) 76%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.18), transparent 30%, transparent 70%, rgba(0, 0, 0, 0.3));
 }
 
 /* ============================================================
@@ -1223,6 +1288,64 @@ img {
   }
 }
 
+@keyframes actor-walk {
+  0%,
+  100% {
+    transform: scale(var(--inv, 1)) translateY(0) rotate(-0.45deg);
+  }
+  50% {
+    transform: scale(var(--inv, 1)) translateY(-3.4%) rotate(0.55deg);
+  }
+}
+
+@keyframes actor-point {
+  0%,
+  100% {
+    transform: scale(var(--inv, 1)) translateX(0) translateY(0) rotate(0deg);
+  }
+  42% {
+    transform: scale(var(--inv, 1)) translateX(5%) translateY(-1%) rotate(2.4deg);
+  }
+  68% {
+    transform: scale(var(--inv, 1)) translateX(3%) translateY(0) rotate(1.1deg);
+  }
+}
+
+@keyframes actor-react {
+  0%,
+  100% {
+    transform: scale(var(--inv, 1)) translateY(0);
+  }
+  28% {
+    transform: scale(var(--inv, 1)) translateY(-5%) scale(1.035);
+  }
+  58% {
+    transform: scale(var(--inv, 1)) translateY(1.5%) scale(0.985);
+  }
+}
+
+@keyframes actor-nod {
+  0%,
+  100% {
+    transform: scale(var(--inv, 1)) rotate(0deg);
+  }
+  24% {
+    transform: scale(var(--inv, 1)) rotate(1.8deg) translateY(2%);
+  }
+  52% {
+    transform: scale(var(--inv, 1)) rotate(-0.8deg) translateY(-1%);
+  }
+}
+
+@keyframes route-dash {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -3.2;
+  }
+}
+
 @keyframes caret-blink {
   0%,
   100% {
@@ -1686,7 +1809,9 @@ img {
    Speaking-voice portrait pulse
    ============================================================ */
 .actor--voicing .actor__portrait {
-  animation: voice-pulse 0.9s ease-in-out infinite;
+  animation:
+    voice-pulse 0.9s ease-in-out infinite,
+    actor-talk 0.72s ease-in-out infinite;
 }
 
 @keyframes voice-pulse {
@@ -1696,6 +1821,19 @@ img {
   }
   50% {
     box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.4), 0 0 34px 8px var(--accent), 0 20px 34px rgba(0, 0, 0, 0.6);
+  }
+}
+
+@keyframes actor-talk {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  35% {
+    transform: scale(1.025) rotate(-0.7deg);
+  }
+  68% {
+    transform: scale(0.995) rotate(0.8deg);
   }
 }
 

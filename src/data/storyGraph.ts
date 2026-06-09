@@ -241,6 +241,7 @@ export const storyScenes: StoryScene[] = [
   {
     id: 'grayson-room',
     title: "Grayson's Paper Boat",
+    locationHotspotId: 'industrial-core',
     collectibleIds: ['grayson-paper-boat'],
     paragraphs: [
       'Grayson does not understand radiation reports, but he understands when Mira is too quiet.',

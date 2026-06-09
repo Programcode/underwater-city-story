@@ -1,4 +1,4 @@
-import type { SceneMood } from '../types';
+import type { MapHotspot, SceneMood } from '../types';
 
 type MoodProfile = {
   /** Root drone frequency (Hz). */
@@ -13,6 +13,15 @@ type MoodProfile = {
   detune: number;
 };
 
+type PlaceLevel = MapHotspot['level'];
+
+type PlaceProfile = {
+  frequency: number;
+  cutoff: number;
+  gain: number;
+  detune: number;
+};
+
 const MOODS: Record<SceneMood, MoodProfile> = {
   calm: { root: 98, cutoff: 760, noise: 0.12, drone: 0.22, detune: 2 },
   tense: { root: 110, cutoff: 540, noise: 0.16, drone: 0.24, detune: 14 },
@@ -20,6 +29,16 @@ const MOODS: Record<SceneMood, MoodProfile> = {
   secret: { root: 87, cutoff: 480, noise: 0.15, drone: 0.26, detune: 18 },
   danger: { root: 65, cutoff: 320, noise: 0.22, drone: 0.3, detune: 22 },
   hope: { root: 131, cutoff: 940, noise: 0.11, drone: 0.22, detune: 3 }
+};
+
+const PLACES: Record<PlaceLevel, PlaceProfile> = {
+  surface: { frequency: 196, cutoff: 1800, gain: 0.035, detune: 3 },
+  top: { frequency: 164, cutoff: 1200, gain: 0.03, detune: 4 },
+  upper: { frequency: 142, cutoff: 980, gain: 0.034, detune: 5 },
+  market: { frequency: 124, cutoff: 860, gain: 0.048, detune: 9 },
+  middle: { frequency: 110, cutoff: 700, gain: 0.038, detune: 7 },
+  lower: { frequency: 82, cutoff: 520, gain: 0.052, detune: 11 },
+  engine: { frequency: 55, cutoff: 360, gain: 0.07, detune: 16 }
 };
 
 type AudioCtor = typeof AudioContext;
@@ -37,9 +56,13 @@ export class AmbienceEngine {
   private droneGain: GainNode | null = null;
   private noiseGain: GainNode | null = null;
   private noiseFilter: BiquadFilterNode | null = null;
+  private placeOsc: OscillatorNode | null = null;
+  private placeGain: GainNode | null = null;
+  private placeFilter: BiquadFilterNode | null = null;
   private lfo: OscillatorNode | null = null;
   private started = false;
   private volume = 0.8;
+  private place: PlaceLevel = 'middle';
 
   private supported(): boolean {
     return typeof window !== 'undefined' && Boolean(window.AudioContext || (window as unknown as { webkitAudioContext?: AudioCtor }).webkitAudioContext);
@@ -103,6 +126,21 @@ export class AmbienceEngine {
       noiseFilter.connect(noiseGain);
       noiseGain.connect(breath);
 
+      // Place layer: a quiet resonant tone that distinguishes levels without
+      // needing looped files. Mood owns the drama; place owns the room tone.
+      const placeOsc = ctx.createOscillator();
+      placeOsc.type = 'triangle';
+      placeOsc.frequency.value = PLACES.middle.frequency;
+      placeOsc.detune.value = PLACES.middle.detune;
+      const placeFilter = ctx.createBiquadFilter();
+      placeFilter.type = 'lowpass';
+      placeFilter.frequency.value = PLACES.middle.cutoff;
+      const placeGain = ctx.createGain();
+      placeGain.gain.value = 0;
+      placeOsc.connect(placeFilter);
+      placeFilter.connect(placeGain);
+      placeGain.connect(breath);
+
       // Slow breathing LFO on the breath gain (around 1.0), never the master.
       const lfo = ctx.createOscillator();
       lfo.frequency.value = 0.06;
@@ -114,6 +152,7 @@ export class AmbienceEngine {
       droneA.start();
       droneB.start();
       noise.start();
+      placeOsc.start();
       lfo.start();
 
       this.ctx = ctx;
@@ -123,8 +162,12 @@ export class AmbienceEngine {
       this.droneGain = droneGain;
       this.noiseGain = noiseGain;
       this.noiseFilter = noiseFilter;
+      this.placeOsc = placeOsc;
+      this.placeGain = placeGain;
+      this.placeFilter = placeFilter;
       this.lfo = lfo;
       this.started = true;
+      this.setPlace(this.place);
       return true;
     } catch {
       return false;
@@ -169,10 +212,23 @@ export class AmbienceEngine {
     this.noiseGain?.gain.setTargetAtTime(profile.noise, now, ramp);
   }
 
+  setPlace(place: PlaceLevel): void {
+    this.place = place;
+    if (!this.started || !this.ctx) return;
+    const profile = PLACES[place] ?? PLACES.middle;
+    const now = this.ctx.currentTime;
+    const ramp = 2.8;
+    this.placeOsc?.frequency.setTargetAtTime(profile.frequency, now, ramp);
+    this.placeOsc?.detune.setTargetAtTime(profile.detune, now, ramp);
+    this.placeFilter?.frequency.setTargetAtTime(profile.cutoff, now, ramp);
+    this.placeGain?.gain.setTargetAtTime(profile.gain, now, ramp);
+  }
+
   dispose(): void {
     try {
       this.fadeOut();
       this.lfo?.stop();
+      this.placeOsc?.stop();
       this.droneA?.stop();
       this.droneB?.stop();
       void this.ctx?.close();
