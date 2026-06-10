@@ -5,6 +5,7 @@ import { getSceneDialogue } from '../data/dialogue';
 import {
   applyChoice,
   createInitialStoryState,
+  endingRouteFlow,
   endings,
   getProjectedEnding,
   getScene,
@@ -63,6 +64,10 @@ describe('story graph', () => {
     expect(dialogue.map((line) => line.text)).toContain(
       "Torin said nobody knew Veyr's name yesterday. So why does this portrait look finished?"
     );
+  });
+
+  it('keeps a new run undecided instead of falling back to dark', () => {
+    expect(getProjectedEnding(createInitialStoryState())).toBe('undecided');
   });
 
   it('projects the current ending from in-progress traits', () => {
@@ -131,58 +136,15 @@ describe('story graph', () => {
     expect(afterDuplicate.collectedItemIds.filter((id) => id === 'veyr-succession-notice')).toHaveLength(1);
   });
 
-  it.each([
-    {
-      expected: 'hopeful',
-      choices: [
-        'rush-to-school',
-        'accept-engine-errand',
-        'enter-wrong-room',
-        'hide-the-memory',
-        'watch-for-patterns',
-        'consider-torin',
-        'listen-at-door',
-        'run-to-torin',
-        'return-for-proof',
-        'broadcast-everything'
-      ]
-    },
-    {
-      expected: 'bittersweet',
-      choices: [
-        'rush-to-school',
-        'accept-engine-errand',
-        'enter-wrong-room',
-        'hide-the-memory',
-        'watch-for-patterns',
-        'investigate-alone',
-        'listen-at-door',
-        'stay-and-record',
-        'anonymous-papers',
-        'lead-the-resistance'
-      ]
-    },
-    {
-      expected: 'dark',
-      choices: [
-        'rush-to-school',
-        'accept-engine-errand',
-        'enter-wrong-room',
-        'hide-the-memory',
-        'watch-for-patterns',
-        'investigate-alone',
-        'listen-at-door',
-        'freeze-in-the-room',
-        'escape-alone',
-        'go-alone'
-      ]
-    }
-  ] as const)('can reach the $expected ending through real choices', ({ choices, expected }) => {
-    const finalState = choices.reduce(
-      (state, choiceId) => applyChoice(state, choiceId),
-      createInitialStoryState()
-    );
+  it.each(endingRouteFlow.map(({ endingId, choiceIds }) => ({ expected: endingId, choices: choiceIds })))(
+    'can reach the $expected ending through real choices',
+    ({ choices, expected }) => {
+      const finalState = choices.reduce(
+        (state, choiceId) => applyChoice(state, choiceId),
+        createInitialStoryState()
+      );
 
-    expect(finalState.endingId).toBe(expected);
-  });
+      expect(finalState.endingId).toBe(expected);
+    }
+  );
 });

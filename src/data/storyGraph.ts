@@ -578,6 +578,11 @@ export type ChoiceCatalogEntry = {
   nextSceneId: string;
 };
 
+export type EndingRoute = {
+  endingId: EndingId;
+  choiceIds: string[];
+};
+
 /** Lookup of every choice by id, used to reconstruct the player's path. */
 export const choiceCatalog: Record<string, ChoiceCatalogEntry> = Object.fromEntries(
   storyScenes.flatMap((scene) =>
@@ -593,6 +598,54 @@ export const choiceCatalog: Record<string, ChoiceCatalogEntry> = Object.fromEntr
   )
 ) as Record<string, ChoiceCatalogEntry>;
 
+export const endingRouteFlow: EndingRoute[] = [
+  {
+    endingId: 'hopeful',
+    choiceIds: [
+      'rush-to-school',
+      'accept-engine-errand',
+      'enter-wrong-room',
+      'hide-the-memory',
+      'watch-for-patterns',
+      'consider-torin',
+      'listen-at-door',
+      'run-to-torin',
+      'return-for-proof',
+      'broadcast-everything'
+    ]
+  },
+  {
+    endingId: 'bittersweet',
+    choiceIds: [
+      'rush-to-school',
+      'accept-engine-errand',
+      'enter-wrong-room',
+      'hide-the-memory',
+      'watch-for-patterns',
+      'investigate-alone',
+      'listen-at-door',
+      'stay-and-record',
+      'anonymous-papers',
+      'lead-the-resistance'
+    ]
+  },
+  {
+    endingId: 'dark',
+    choiceIds: [
+      'rush-to-school',
+      'accept-engine-errand',
+      'enter-wrong-room',
+      'hide-the-memory',
+      'watch-for-patterns',
+      'investigate-alone',
+      'listen-at-door',
+      'freeze-in-the-room',
+      'escape-alone',
+      'go-alone'
+    ]
+  }
+];
+
 export function getScene(id: string): StoryScene {
   const scene = storyScenes.find((candidate) => candidate.id === id);
 
@@ -603,20 +656,42 @@ export function getScene(id: string): StoryScene {
   return scene;
 }
 
+function hasHopefulEndingTraits(traits: Record<TraitKey, number>): boolean {
+  return traits.evidence >= 3 && traits.trust >= 2 && traits.collective >= 2 && traits.risk <= 2;
+}
+
+function hasBittersweetEndingTraits(traits: Record<TraitKey, number>): boolean {
+  return traits.evidence >= 2 && traits.collective >= 2;
+}
+
 export function resolveEnding(traits: Record<TraitKey, number>): EndingId {
-  if (traits.evidence >= 3 && traits.trust >= 2 && traits.collective >= 2 && traits.risk <= 2) {
+  if (hasHopefulEndingTraits(traits)) {
     return 'hopeful';
   }
 
-  if (traits.evidence >= 2 && traits.collective >= 2) {
+  if (hasBittersweetEndingTraits(traits)) {
     return 'bittersweet';
   }
 
   return 'dark';
 }
 
-export function getProjectedEnding(state: Pick<StoryState, 'endingId' | 'traits'>): EndingId {
-  return state.endingId ?? resolveEnding(state.traits);
+export type ProjectedEndingId = EndingId | 'undecided';
+
+export function getProjectedEnding(state: Pick<StoryState, 'endingId' | 'traits'>): ProjectedEndingId {
+  if (state.endingId) {
+    return state.endingId;
+  }
+
+  if (hasHopefulEndingTraits(state.traits)) {
+    return 'hopeful';
+  }
+
+  if (hasBittersweetEndingTraits(state.traits)) {
+    return 'bittersweet';
+  }
+
+  return 'undecided';
 }
 
 export function createInitialStoryState(): StoryState {
