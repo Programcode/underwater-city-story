@@ -5,12 +5,24 @@ import { voidPlugin } from 'void';
 
 export default defineConfig(({ mode }) => {
   // Read every env var so the client gets only a boolean capability flag.
-  // Runtime ElevenLabs calls go through the Void API route, which holds the key.
+  // Runtime ElevenLabs calls go through a server route, which holds the key.
+  // On Vercel the key is provided via the dashboard (process.env), while local
+  // dev/Cloudflare builds read it from .env files via loadEnv.
   const env = loadEnv(mode, process.cwd(), '');
-  const elevenKey = env.ELEVENLABS_API_KEY || env.VITE_ELEVENLABS_API_KEY || '';
+  const elevenKey =
+    env.ELEVENLABS_API_KEY ||
+    env.VITE_ELEVENLABS_API_KEY ||
+    process.env.ELEVENLABS_API_KEY ||
+    process.env.VITE_ELEVENLABS_API_KEY ||
+    '';
+
+  // The Void plugin targets Cloudflare (SSR + D1) and is unnecessary — and
+  // disruptive — for a plain static build. Skip it on Vercel (or when
+  // STATIC_BUILD=1) so `vite build` emits a clean SPA into dist/.
+  const staticBuild = Boolean(process.env.VERCEL) || process.env.STATIC_BUILD === '1';
 
   return {
-    plugins: [voidPlugin(), react()],
+    plugins: [...(staticBuild ? [] : [voidPlugin()]), react()],
     // Expose only a boolean to the client — never the key itself.
     define: {
       __ELEVEN_VOICES__: JSON.stringify(Boolean(elevenKey))
