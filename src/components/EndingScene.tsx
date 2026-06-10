@@ -161,7 +161,7 @@ export function EndingScene({
         <div className="map-camera" style={{ transform: `scale(${zoom})` }}>
           <div className={`map-camera__drift ${reduced ? 'is-still' : ''}`}>
             <img
-              src="/assets/map.jpg"
+              src="/assets/map.webp"
               width={MAP_WIDTH}
               height={MAP_HEIGHT}
               alt="Illustrated old map of the underwater city of Athel"

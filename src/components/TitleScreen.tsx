@@ -12,7 +12,7 @@ export function TitleScreen({ onBegin, onContinue, canContinue, reduced }: Title
   return (
     <section className="title-screen" data-testid="title-screen">
       <div className={`title-screen__bg ${reduced ? 'is-still' : ''}`}>
-        <img src="/assets/map.jpg" alt="" className="title-screen__map" aria-hidden="true" draggable={false} />
+        <img src="/assets/map.webp" alt="" className="title-screen__map" aria-hidden="true" draggable={false} />
       </div>
       <div className="title-screen__wash" aria-hidden="true" />
       <div className="map-caustics" aria-hidden="true" />
