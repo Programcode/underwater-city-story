@@ -80,6 +80,12 @@ test('optional choices collect artifacts and lore into the foldout atlas', async
 
   await page.getByRole('button', { name: 'Open the atlas' }).click();
   const atlas = page.getByRole('dialog', { name: 'The atlas of Athel' });
+  const trajectory = atlas.locator('[aria-label="Ending trajectory"]');
+  await expect(trajectory).toContainText('Path still forming');
+  await expect(trajectory).not.toContainText('Dark Ending');
+  const flowchart = atlas.locator('[aria-label="Choice flowchart"]');
+  await expect(flowchart).toContainText('Broadcast every piece of proof');
+  await expect(flowchart).toContainText('Use the hatch alone');
   await expect(atlas).toContainText('Tuna Sandwich');
   await expect(atlas).toContainText('Veyr Succession Notice');
   await page.getByRole('button', { name: 'Close the atlas' }).click();

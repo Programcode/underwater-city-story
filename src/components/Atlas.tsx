@@ -3,11 +3,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Lock, X } from 'lucide-react';
 
 import { characters } from '../data/characters';
-import { endings, getProjectedEnding } from '../data/storyGraph';
+import { choiceCatalog, endingRouteFlow, endings, getProjectedEnding, type ProjectedEndingId } from '../data/storyGraph';
 import { getHotspot } from '../data/mapHotspots';
 import { achievements } from '../lib/achievements';
 import { readProgress } from '../lib/progress';
-import type { CharacterId, EndingId, StoryState } from '../types';
+import type { CharacterId, StoryState } from '../types';
 import { Journal } from './Journal';
 
 type AtlasProps = {
@@ -19,7 +19,8 @@ type AtlasProps = {
 
 const castOrder: CharacterId[] = ['mira', 'ocean', 'torin', 'veyr'];
 
-const trajectoryCopy: Record<EndingId, string> = {
+const trajectoryCopy: Record<ProjectedEndingId, string> = {
+  undecided: 'Mira has not gathered enough proof, allies, or public support for the atlas to name a clear ending yet.',
   hopeful: 'Mira is building enough proof, trust, and public support to reveal the truth with control.',
   bittersweet: 'The truth is moving faster than Mira can organise people around it.',
   dark: 'Mira is still too isolated, underprepared, or exposed to free the Tank safely.'
@@ -38,7 +39,8 @@ export function Atlas({ open, storyState, onClose, reduced }: AtlasProps) {
   const discoveredPlaces = storyState.discoveredHotspotIds.map((id) => getHotspot(id));
   const unlocked = new Set(readProgress().achievements);
   const projectedEndingId = getProjectedEnding(storyState);
-  const projectedEnding = endings[projectedEndingId];
+  const projectedEndingTitle =
+    projectedEndingId === 'undecided' ? 'Path still forming' : endings[projectedEndingId].title;
 
   return (
     <AnimatePresence>
@@ -81,11 +83,29 @@ export function Atlas({ open, storyState, onClose, reduced }: AtlasProps) {
                   <h3>Ending trajectory</h3>
                 </div>
                 <div className="atlas__trajectory-body">
-                  <p className="atlas__trajectory-title">{projectedEnding.title}</p>
+                  <p className="atlas__trajectory-title">{projectedEndingTitle}</p>
                   <p>{trajectoryCopy[projectedEndingId]}</p>
                   {!storyState.endingId ? (
                     <p className="atlas__trajectory-note">This can still change with later choices.</p>
                   ) : null}
+                </div>
+              </section>
+
+              <section className="atlas__routes" aria-label="Choice flowchart">
+                <h3>Choice flowchart</h3>
+                <div className="ending-flow">
+                  {endingRouteFlow.map((route) => (
+                    <article className={`ending-flow__route ending-flow__route--${route.endingId}`} key={route.endingId}>
+                      <h4>{endings[route.endingId].title}</h4>
+                      <ol>
+                        <li className="ending-flow__terminal">Start</li>
+                        {route.choiceIds.map((choiceId) => (
+                          <li key={`${route.endingId}-${choiceId}`}>{choiceCatalog[choiceId].label}</li>
+                        ))}
+                        <li className="ending-flow__terminal">{endings[route.endingId].title}</li>
+                      </ol>
+                    </article>
+                  ))}
                 </div>
               </section>
 
