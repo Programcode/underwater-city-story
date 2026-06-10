@@ -214,7 +214,7 @@ img {
 .character-portrait {
   display: inline-block;
   flex: 0 0 auto;
-  background-image: url('/assets/characters-living.png');
+  background-image: url('/assets/characters-living.webp');
   background-repeat: no-repeat;
   background-size: 200% 200%;
 }

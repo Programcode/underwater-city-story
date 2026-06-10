@@ -79,7 +79,7 @@ export function MapOverlay({ open, storyState, onClose, reduced }: MapOverlayPro
               transition={{ duration: reduced ? 0 : 0.5, ease: 'easeOut' }}
             >
               <img
-                src="/assets/map.jpg"
+                src="/assets/map.webp"
                 width={MAP_WIDTH}
                 height={MAP_HEIGHT}
                 alt="Full illustrated cross-section map of the underwater city of Athel"
