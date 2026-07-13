@@ -16,6 +16,17 @@ npm run e2e      # end-to-end tests (Playwright)
 npm run lint
 ```
 
+## Deployment targets
+
+Vercel is the static production target. Its repository configuration runs the
+same typechecked `npm run build` command used locally and serves `dist/` as a
+single-page app. Vite-hashed assets and content-addressed voice files are cached
+immutably; HTML and `public/audio/manifest.json` are revalidated.
+
+Cloudflare remains supported through Void for anyone who needs the server routes
+or D1-backed demo API. The `Deploy to Cloudflare with Void` workflow is explicit
+about that target and runs only from `main` or by manual dispatch.
+
 ## Voices & sound (ElevenLabs, optional)
 
 The narrator and each character can be voiced with ElevenLabs text-to-speech,

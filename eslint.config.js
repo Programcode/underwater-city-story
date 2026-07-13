@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
@@ -10,16 +11,19 @@ export default [
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    files: ['*.config.{js,ts}', 'scripts/**/*.{js,mjs,ts}'],
+    languageOptions: {
+      globals: globals.node
+    }
+  },
+  {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
       globals: {
-        document: 'readonly',
-        window: 'readonly',
-        HTMLElement: 'readonly',
-        console: 'readonly',
-        process: 'readonly'
+        ...globals.browser,
+        ...globals.node
       }
     },
     plugins: {
