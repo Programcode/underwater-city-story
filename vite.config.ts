@@ -1,6 +1,5 @@
 import react from '@vitejs/plugin-react';
-import { loadEnv } from 'vite';
-import { defineConfig } from 'vitest/config';
+import { defineConfig, loadEnv } from 'vite';
 import { voidPlugin } from 'void';
 
 export default defineConfig(({ mode }) => {
@@ -16,13 +15,12 @@ export default defineConfig(({ mode }) => {
     process.env.VITE_ELEVENLABS_API_KEY ||
     '';
 
-  // The Void plugin targets Cloudflare (SSR + D1) and is unnecessary — and
-  // disruptive — for a plain static build. Skip it on Vercel (or when
-  // STATIC_BUILD=1) so `vite build` emits a clean SPA into dist/.
+  // Keep the Cloudflare/Void build available while producing a normal Vite SPA
+  // for Vercel and other static hosts.
   const staticBuild = Boolean(process.env.VERCEL) || process.env.STATIC_BUILD === '1';
 
   return {
-    plugins: [...(staticBuild ? [] : [voidPlugin()]), react()],
+    plugins: [react(), ...(staticBuild ? [] : [voidPlugin()])],
     // Expose only a boolean to the client — never the key itself.
     define: {
       __ELEVEN_VOICES__: JSON.stringify(Boolean(elevenKey))
