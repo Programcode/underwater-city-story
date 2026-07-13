@@ -1,8 +1,6 @@
 name: Deploy to Cloudflare with Void
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
 
 jobs:
   deploy:
