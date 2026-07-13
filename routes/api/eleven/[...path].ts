@@ -19,7 +19,9 @@ export const POST = defineHandler(async (c) => {
     return c.json({ error: 'Unsupported ElevenLabs endpoint.' }, 404);
   }
 
-  const apiKey = env.ELEVENLABS_API_KEY || env.VITE_ELEVENLABS_API_KEY;
+  const apiKey = [env.ELEVENLABS_API_KEY, env.VITE_ELEVENLABS_API_KEY].find(
+    (value): value is string => typeof value === 'string' && value.length > 0
+  );
 
   if (!apiKey) {
     return c.json({ error: 'ElevenLabs API key is not configured.' }, 503);
