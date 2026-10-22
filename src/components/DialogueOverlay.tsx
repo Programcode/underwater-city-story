@@ -40,7 +40,7 @@ export function DialogueOverlay({ speaker, children, showContinue, onAdvance }: 
   );
 
   return (
-    <div className="dialogue" data-speaker={speaker} aria-label="Narrator dialogue">
+    <div className="dialogue" data-speaker={speaker} aria-label={`${name} dialogue`}>
       {showContinue ? (
         <button type="button" className="dialogue__box" aria-label="Continue" onClick={onAdvance}>
           {inner}

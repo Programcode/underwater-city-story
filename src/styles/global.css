@@ -816,6 +816,19 @@ img {
   color: rgba(246, 234, 208, 0.55);
 }
 
+.title-screen__credit {
+  margin: 1.4rem 0 0;
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(246, 234, 208, 0.42);
+}
+
+.title-screen__credit a {
+  color: inherit;
+}
+
 /* ============================================================
    Ending finale card
    ============================================================ */

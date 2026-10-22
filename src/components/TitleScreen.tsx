@@ -54,6 +54,9 @@ export function TitleScreen({ onBegin, onContinue, canContinue, reduced }: Title
         </motion.div>
 
         <p className="title-screen__hint">Click, or press Space, to let the story speak.</p>
+        <p className="title-screen__credit">
+          Voices and sound · <a href="https://elevenlabs.io">elevenlabs.io</a>
+        </p>
       </motion.div>
     </section>
   );
